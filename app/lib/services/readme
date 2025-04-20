@@ -1,0 +1,21 @@
+
+
+A. Cross-Cutting Concerns & Infrastructure Abstractions:
+These are functionalities needed across potentially multiple features but are not core, foundational infrastructure (which belongs in Core).
+They often encapsulate interactions with external systems or platform capabilities.
+They provide a single, consistent point of interaction for the rest of the app.
+Examples:
+AnalyticsService: Wraps Firebase Analytics, Amplitude, etc. Used by many features to log events. (Fits Definition 2/3)
+CrashReportingService: Wraps Sentry, Firebase Crashlytics. Initialized once, works globally. (Fits Definition 2)
+NotificationService: Manages setup and interaction with FCM/APNS. (Fits Definition 2)
+FileUploadService: Handles the logic for uploading files, maybe managing background state. Used potentially by profile feature, messaging feature, etc. (Fits Definition 2/3)
+AuthService: If authentication logic is complex and shared beyond a single auth feature (e.g., token refresh logic used by multiple repositories), parts of it might live here. Often, however, core auth stays within its own feature.
+
+
+
+
+# Why use this lib/services/ folder?
+Keeps Core Clean: Prevents Core from being bloated with specific implementations like Analytics or Upload logic.
+Avoids Feature Entanglement: Prevents putting shared infrastructure logic (like Analytics) randomly into one specific feature's folder.
+Clear Responsibility: Makes it obvious where to find the implementation for these specific, shared capabilities.
+Testability & DI: These services are easily registered via Dependency Injection (core/di) and mocked in tests for the features that use them.

@@ -1,0 +1,11 @@
+
+
+add here 
+1.utils
+2.extentions
+3.services => use case that is not really part "../../../example/application/utils"one pertical cubit nor should it be outside,
+ but it does something to the models, or interact with other repositoies, or even another feature (AKA domain!)
+ but it's not a restirction at all, you can even use any thing from anything, remember FAST !!!!
+
+
+
