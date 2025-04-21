@@ -218,7 +218,7 @@ export default class GooglePlayProvider {
 
 
     async verifyPurchase(serverToken: string) {
-        const response = await fetch(`https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${this.packageName}/purchases/subscriptions/me.laknabil.voca.premium/tokens/${serverToken}`, {
+        const response = await fetch(`https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${this.packageName}/purchases/subscriptions/me.laknabil.habitvote.premium/tokens/${serverToken}`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${await this.getToken()}`,

@@ -237,5 +237,5 @@ lcov.info
 *.seed
 *.pid.lock
 
-app/build/**
-app/build/.**
+**/app/build/**
+**/app/build/.**

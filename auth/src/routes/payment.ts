@@ -89,7 +89,7 @@ PaymentAPI.get("/:uid/:productId", async (c) => {
             uid,
             productId: target?.basePlanId ?? productId,
             offerId: target?.offerId ?? productId,
-            package: "me.laknabil.vocafusion"
+            package: "me.laknabil.habitvotefusion"
         },
     })
 
@@ -101,7 +101,7 @@ PaymentAPI.get("/:uid/:productId", async (c) => {
 PaymentAPI.post("/webhook/stripe", async (c) => {
     const body = await c.req.json();
     console.log(body);
-    if (body.type != "checkout.session.completed" || body.data.object.metadata.package != "me.laknabil.vocafusion") {
+    if (body.type != "checkout.session.completed" || body.data.object.metadata.package != "me.laknabil.habitvotefusion") {
         return c.json({ status: "error", message: "Invalid event type" });
     }
 
@@ -148,7 +148,7 @@ PaymentAPI.post("/purchase/google-play/verify/:uid", async (c) => {
 
     const google = new GoogleProvider(c.env);
 
-    const play = new GooglePlayProvider(google, "me.laknabil.voca");
+    const play = new GooglePlayProvider(google, "me.laknabil.habitvote");
     const purchase = await play.verifyPurchase(serverToken)
 
 
