@@ -4,7 +4,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class TodayVotersWidget extends StatefulWidget {
-  const TodayVotersWidget({super.key});
+  // add empty-state toggle
+  final bool showEmpty;
+  const TodayVotersWidget({super.key, this.showEmpty = false});
 
   @override
   State<TodayVotersWidget> createState() => _TodayVotersWidgetState();
@@ -52,12 +54,14 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
                   _buildVoteTypeWidget(
                     emoji: '😑',
                     label: 'Challengers',
+                    description: 'They Say You Can\'t',
                     isPositive: false,
                   ),
                   const SizedBox(width: 16),
                   _buildVoteTypeWidget(
                     emoji: '😎',
                     label: 'Believers',
+                    description: 'They Say You Can',
                     isPositive: true,
                   ),
                 ],
@@ -75,8 +79,10 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
     required String emoji,
     required String label,
     required bool isPositive,
+    String? description,
     int count = 88, // Example count for visual effect
   }) {
+    final showDescription = description != null && widget.showEmpty;
     // Use IntrinsicWidth to make the column take the width of its widest child
     return IntrinsicWidth(
       child: Column(
@@ -89,12 +95,14 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
             padding: const EdgeInsets.symmetric(vertical: 6), // Adjust padding
             decoration: BoxDecoration(
               // Slightly darker background or transparent if needed
-              color: Colors.grey.shade900.withOpacity(0.5),
+              color: Colors.grey.shade900.withAlpha(125),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: isPositive
-                    ? Theme.of(context).primaryColor // Green for believers
-                    : Colors.red.shade700, // Red for challengers
+                    ? Theme.of(context)
+                        .primaryColor
+                        .withAlpha(50) // Green for believers
+                    : Colors.red.shade700.withAlpha(50), // Red for challengers
                 width: 1, // Slightly thicker border
               ),
             ),
@@ -106,25 +114,40 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
           // Label below the container
           Text(
             label,
-            style: TextStyle(color: Colors.grey.shade300, fontSize: 14),
+            style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
             textAlign: TextAlign.center,
           ),
-          // Blurred count
-          ImageFiltered(
-            imageFilter: ImageFilter.blur(
-              sigmaX: 3,
-              sigmaY: 1.2,
-            ),
-            child: Text(
-              count.toString().padLeft(2, '8'), // Pad with '8' for blur effect
+
+          if (showDescription)
+            Text(
+              description,
               style: TextStyle(
-                color: Colors.white, // Darker grey for blurred effect
-                fontSize: 16, // Slightly larger font for blurred number
+                color: Colors.grey.shade600,
+                fontSize: 10,
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
             ),
-          ),
+
+          // Blurred count
+          if (!showDescription)
+            ImageFiltered(
+              imageFilter: ImageFilter.blur(
+                sigmaX: 3,
+                sigmaY: 1.2,
+              ),
+              child: Text(
+                count
+                    .toString()
+                    .padLeft(2, '8'), // Pad with '8' for blur effect
+                style: TextStyle(
+                  color: Colors.white, // Darker grey for blurred effect
+                  fontSize: 16, // Slightly larger font for blurred number
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
         ],
       ),
     );
@@ -155,8 +178,10 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
                 painter: DotsPainter(
                   animation: _dotsAnimationController,
                   positiveColor:
-                      Theme.of(context).primaryColor, // Use theme color
+                      Theme.of(context).primaryColorLight, // Use theme color
                   negativeColor: Colors.red.shade700, // Use red for negative
+                  positiveCount: 23, // total positives
+                  negativeCount: 7, // total negatives
                 ),
                 size: const Size(120, 120),
               );
@@ -175,25 +200,53 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
             ),
           ),
           // Vote count
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                '30',
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
+          if (widget.showEmpty)
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Your',
+                  style: TextStyle(
+                    fontSize: 21,
+                    color: Colors.grey,
+                  ),
                 ),
-              ),
-              const Text(
-                'Votes',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
+                const Text(
+                  'Voters',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
-          ),
+                const Text(
+                  'Zone',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          if (!widget.showEmpty)
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  '30',
+                  style: TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Text(
+                  'Votes',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );
@@ -204,6 +257,8 @@ class DotsPainter extends CustomPainter {
   final Animation<double> animation;
   final Color positiveColor;
   final Color negativeColor;
+  final int positiveCount;
+  final int negativeCount;
   // Use a single Random instance seeded once for consistent randomness across paints
   final math.Random random = math.Random(42);
   // Store initial random properties for each dot
@@ -213,9 +268,12 @@ class DotsPainter extends CustomPainter {
     required this.animation,
     required this.positiveColor,
     required this.negativeColor,
+    required this.positiveCount,
+    required this.negativeCount,
   }) {
+    final total = positiveCount + negativeCount;
     // Initialize properties once
-    _dotProperties = List.generate(35, (i) {
+    _dotProperties = List.generate(total, (i) {
       // Increased dot count slightly
       final angle = random.nextDouble() * 2 * math.pi;
       // Start dots more spread out, not just at center
@@ -224,7 +282,7 @@ class DotsPainter extends CustomPainter {
       final speedFactor = random.nextDouble() * 0.5 + 0.5; // Vary speed
       final direction = random.nextBool() ? 1.0 : -1.0; // Vary direction
       final size = random.nextDouble() * 4.0 + 1.5; // Vary size
-      final isPositive = random.nextDouble() < 0.66; // ~2/3 positive
+      final isPositive = i < positiveCount;
       final initialOpacity =
           0.5 + random.nextDouble() * 0.4; // Vary initial opacity
 
@@ -238,6 +296,7 @@ class DotsPainter extends CustomPainter {
         initialOpacity: initialOpacity,
       );
     });
+    _dotProperties.shuffle(random);
   }
 
   @override

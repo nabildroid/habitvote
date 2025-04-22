@@ -46,7 +46,11 @@ class _HomeScreenState extends State<HomeScreen> {
               TodayVotersWidget(),
               const SizedBox(height: 16),
               HabitHeatmapWidget(
-                completedDates: List.generate(200, (_) {
+                habitDescription: 'Read 10 pages of a book',
+                habitName: 'Reading',
+                habitIcon: Icons.book,
+                startDayOfWeek: 0, // 0 = Sunday
+                completedDates: List.generate(0, (_) {
                   // Generate a random number of days between 1 and 365
                   final randomDays = 1 + Random().nextInt(365);
                   return DateTime.now().subtract(Duration(days: randomDays));

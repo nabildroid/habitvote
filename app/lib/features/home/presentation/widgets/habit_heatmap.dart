@@ -4,11 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class HabitHeatmapWidget extends StatefulWidget {
+  final String habitName;
+  final String habitDescription;
+  final IconData habitIcon;
   final List<DateTime> completedDates;
+  final int startDayOfWeek; // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
 
   const HabitHeatmapWidget({
     super.key,
     this.completedDates = const [],
+    this.startDayOfWeek = 1,
+    required this.habitName,
+    required this.habitDescription,
+    required this.habitIcon, // Default to Monday
   });
 
   @override
@@ -16,8 +24,19 @@ class HabitHeatmapWidget extends StatefulWidget {
 }
 
 class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
-  // Day labels to display on the left
-  final List<String> _dayLabels = const ['Mon', 'Wed', 'Fri', 'Sun'];
+  // Day labels to display on the left - will be dynamically generated
+  late final List<String> _dayLabels;
+
+  // All days of the week in order
+  final List<String> _allDayLabels = const [
+    'Sun',
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat'
+  ];
 
   // Separate scroll controllers for the month labels and the heatmap
   late ScrollController _monthScrollController;
@@ -33,8 +52,11 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
   void initState() {
     super.initState();
 
-    // Initialize dates - go back 1 year from today
-    _startDate = _today.subtract(const Duration(days: 365));
+    // Generate day labels starting from the configured start day
+    _dayLabels = _generateDayLabels();
+
+    // Initialize dates - go back 1 year from today and align to start of week
+    _startDate = _calculateStartDate();
 
     // Calculate total days and weeks
     _totalDays = _today.difference(_startDate).inDays + 1;
@@ -54,6 +76,34 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
             .jumpTo(_heatmapScrollController.position.maxScrollExtent);
       }
     });
+  }
+
+  // Generate day labels based on the start day of week
+  List<String> _generateDayLabels() {
+    // Pick every other day for display (to avoid crowding)
+    List<String> orderedDays = [];
+
+    // Start from configured start day and wrap around
+    for (int i = 0; i < 7; i += 2) {
+      int dayIndex = (widget.startDayOfWeek + i) % 7;
+      orderedDays.add(_allDayLabels[dayIndex]);
+    }
+
+    return orderedDays;
+  }
+
+  // Calculate the start date aligned to the specified day of week
+  DateTime _calculateStartDate() {
+    // Go back 1 year from today
+    DateTime oneYearAgo = DateTime(_today.year - 1, _today.month, _today.day);
+
+    // Find the previous occurrence of the start day of week
+    int daysToSubtract = (oneYearAgo.weekday - widget.startDayOfWeek) % 7;
+    if (daysToSubtract > 0) {
+      daysToSubtract = 7 - daysToSubtract;
+    }
+
+    return oneYearAgo.subtract(Duration(days: daysToSubtract));
   }
 
   // Sync month labels with the heatmap
@@ -77,7 +127,7 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
   Widget build(BuildContext context) {
     return Container(
       height: 300,
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(6),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Color(0xff111111),
@@ -92,15 +142,15 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
         children: [
           Row(
             children: [
-              const Icon(Icons.directions_walk),
+              Icon(widget.habitIcon),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     FittedBox(
                       child: Text(
-                        'Walk around the block',
+                        widget.habitName,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -109,7 +159,7 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
                     ),
                     FittedBox(
                       child: Text(
-                        'Go for a short walk to clear the mind',
+                        widget.habitDescription,
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey,
@@ -183,46 +233,36 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
   }
 
   Widget _buildMonthLabelsRow() {
-    // Create a list of all months in the date range
-    List<DateTime> monthStarts = [];
-    DateTime currentDate = DateTime(_startDate.year, _startDate.month, 1);
-
-    // Generate all month starts until we reach today's month
-    while (currentDate.isBefore(_today) ||
-        (currentDate.year == _today.year &&
-            currentDate.month == _today.month)) {
-      monthStarts.add(currentDate);
-      // Move to next month
-      if (currentDate.month == 12) {
-        currentDate = DateTime(currentDate.year + 1, 1, 1);
-      } else {
-        currentDate = DateTime(currentDate.year, currentDate.month + 1, 1);
-      }
-    }
-
     return ListView.builder(
-      controller: _monthScrollController, // Use month controller
+      controller: _monthScrollController,
       scrollDirection: Axis.horizontal,
-      physics:
-          const NeverScrollableScrollPhysics(), // Prevent direct scrolling of month labels
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: _totalWeeks,
       itemBuilder: (context, weekIndex) {
-        // Calculate the date for this week
-        DateTime weekDate = _startDate.add(Duration(days: weekIndex * 7));
+        // Calculate the first day shown in this week's column
+        DateTime firstDayOfWeek = _getDateFromWeekIndex(weekIndex);
 
-        // Determine if this week starts a new month
-        bool isMonthStart = weekDate.day <= 7 &&
-            (weekIndex == 0 ||
-                _startDate.add(Duration(days: (weekIndex - 1) * 7)).month !=
-                    weekDate.month);
+        // For month label positioning, check if any day in this column is the first day of a month
+        bool showMonthLabel = false;
+        String monthLabel = '';
 
-        // Only show month label at the start of each month
+        // Check each day in the column
+        for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
+          DateTime currentDate = firstDayOfWeek.add(Duration(days: dayOffset));
+          // If this is the first day of a month, we should show the month label
+          if (currentDate.day == 1) {
+            showMonthLabel = true;
+            monthLabel = DateFormat('MMM').format(currentDate);
+            break;
+          }
+        }
+
         return Container(
-          width: 30, // Match the width of grid cells
+          width: 30,
           alignment: Alignment.center,
-          child: isMonthStart
+          child: showMonthLabel
               ? Text(
-                  DateFormat('MMM').format(weekDate),
+                  monthLabel,
                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                 )
               : const SizedBox.shrink(),
@@ -231,9 +271,16 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
     );
   }
 
+  // Helper method to get the date from a week index
+  DateTime _getDateFromWeekIndex(int weekIndex) {
+    // The weekIndex represents columns in our grid
+    // Each column is 7 days starting from our startDate
+    return _startDate.add(Duration(days: weekIndex * 7));
+  }
+
   Widget _buildHabitHeatmap() {
     return GridView.builder(
-      controller: _heatmapScrollController, // Use heatmap controller
+      controller: _heatmapScrollController,
       scrollDirection: Axis.horizontal,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 7, // 7 days in a week
@@ -241,11 +288,14 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
         crossAxisSpacing: 4,
         childAspectRatio: 1,
       ),
-      itemCount: _totalWeeks * 7, // Total cells needed
+      itemCount: _totalWeeks * 7,
       itemBuilder: (context, index) {
-        // Calculate the date for this cell
-        final int dayOffset = index;
-        final DateTime cellDate = _startDate.add(Duration(days: dayOffset));
+        final int col = index ~/ 7; // Column/week index
+        final int row = index % 7; // Row/day of week index
+
+        // Calculate this cell's date by finding its column's first day and adding the row offset
+        final DateTime firstDayOfColumn = _getDateFromWeekIndex(col);
+        final DateTime cellDate = firstDayOfColumn.add(Duration(days: row));
 
         // Check if this date is today
         final bool isToday = _isToday(cellDate);

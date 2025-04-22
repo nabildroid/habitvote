@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-enum SlideDirection { left, right }
-
 class CheckinSliderWidget extends StatefulWidget {
   const CheckinSliderWidget({super.key});
 
@@ -10,13 +8,11 @@ class CheckinSliderWidget extends StatefulWidget {
 }
 
 class _CheckinSliderWidgetState extends State<CheckinSliderWidget> {
-  SlideDirection? _confirmedDirection;
-  double _confirmedSliderPosition = 0.5;
+  bool? isDone; // null = not checked, false = failed, true = completed
 
   @override
   Widget build(BuildContext context) {
-    final isConfirmed = _confirmedDirection != null;
-    final isTimeToCheckIn = DateTime.now().hour >= 20; // Example check-in time
+    final isChecked = isDone != null;
 
     return Container(
       // Use the dark background color consistent with the bottom area
@@ -36,124 +32,49 @@ class _CheckinSliderWidgetState extends State<CheckinSliderWidget> {
       child: Column(
         mainAxisSize: MainAxisSize.min, // Take minimum space
         children: [
-          Container(
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade900,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Left Emoji (Challenger)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 16.0),
-                    child: Text(
-                      '😑',
-                      style: TextStyle(
-                        fontSize: 24,
-                        // Dim if confirmed right
-                        color: isConfirmed &&
-                                _confirmedDirection == SlideDirection.right
-                            ? Colors.grey.shade700
-                            : Colors.white,
-                      ),
-                    ),
+          Row(
+            children: [
+              // Right slide-to-confirm area
+              Expanded(
+                child: Container(
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Color(0xff111111),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: Color(0xff333333), width: 1),
                   ),
+                  child: SlideToConfirm(onConfirmed: (completed) {
+                    setState(() {
+                      isDone = completed;
+                    });
+                  }),
                 ),
-                // Right Emoji (Believer)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 16.0),
-                    child: Text(
-                      '😎',
-                      style: TextStyle(
-                        fontSize: 24,
-                        // Dim if confirmed left
-                        color: isConfirmed &&
-                                _confirmedDirection == SlideDirection.left
-                            ? Colors.grey.shade700
-                            : Colors.white,
-                      ),
-                    ),
+              ),
+              const SizedBox(width: 16),
+
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isDone = false; // Mark as failed
+                  });
+                },
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.red.shade700,
                   ),
+                  child: Icon(Icons.thumb_down, color: Colors.white),
                 ),
-                // Only show the slider if not confirmed
-                if (!isConfirmed)
-                  SlideToConfirm(
-                    onConfirmed: (direction) {
-                      setState(() {
-                        _confirmedDirection = direction;
-                        _confirmedSliderPosition =
-                            direction == SlideDirection.left ? 0.0 : 1.0;
-                        // Potentially trigger other actions here
-                      });
-                    },
-                  )
-                // Show a static indicator if confirmed
-                else
-                  Align(
-                    alignment: _confirmedDirection == SlideDirection.left
-                        ? Alignment.centerLeft
-                        : Alignment.centerRight,
-                    child: Container(
-                      width: 50,
-                      height: 50,
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 5), // Match slider margin
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _confirmedDirection == SlideDirection.left
-                            ? Colors.red.shade700 // Confirmed red
-                            : Theme.of(context).primaryColor, // Confirmed green
-                      ),
-                      child: Icon(
-                        _confirmedDirection == SlideDirection.left
-                            ? Icons.close // Example icon for confirmed left
-                            : Icons.check, // Example icon for confirmed right
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                // Add navigation arrows (visual only based on image)
-                if (!isConfirmed) // Hide arrows when confirmed
-                  Positioned(
-                    left: 60, // Adjust position as needed
-                    child: Icon(Icons.keyboard_arrow_left,
-                        color: Colors.grey.shade700),
-                  ),
-                if (!isConfirmed)
-                  Positioned(
-                    left: 80, // Adjust position as needed
-                    child: Icon(Icons.keyboard_arrow_left,
-                        color: Colors.grey.shade700),
-                  ),
-                if (!isConfirmed)
-                  Positioned(
-                    right: 60, // Adjust position as needed
-                    child: Icon(Icons.keyboard_arrow_right,
-                        color: Colors.grey.shade700),
-                  ),
-                if (!isConfirmed)
-                  Positioned(
-                    right: 80, // Adjust position as needed
-                    child: Icon(Icons.keyboard_arrow_right,
-                        color: Colors.grey.shade700),
-                  ),
-              ],
-            ),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           Text(
-            // Update text based on confirmation or time
-            isConfirmed
-                ? (_confirmedDirection == SlideDirection.left
-                    ? 'Checked in as Challenger!'
-                    : 'Checked in as Believer!')
-                : 'You can\'t check in until 8 PM.', // Or dynamic time
+            isChecked
+                ? (isDone == true ? 'Completed habit!' : 'Failed habit!')
+                : 'Slide right to complete or tap left to fail',
             style: TextStyle(color: Colors.grey),
           ),
         ],
@@ -163,7 +84,7 @@ class _CheckinSliderWidgetState extends State<CheckinSliderWidget> {
 }
 
 class SlideToConfirm extends StatefulWidget {
-  final Function(SlideDirection) onConfirmed;
+  final Function(bool) onConfirmed;
 
   const SlideToConfirm({Key? key, required this.onConfirmed}) : super(key: key);
 
@@ -172,7 +93,7 @@ class SlideToConfirm extends StatefulWidget {
 }
 
 class _SlideToConfirmState extends State<SlideToConfirm> {
-  double position = 0.5; // Start in the middle
+  double position = 0.0; // start at left
   bool isDragging = false;
   final double _thumbSize = 50.0; // Size of the draggable thumb
   final double _padding = 5.0; // Padding on each side inside the container
@@ -201,17 +122,13 @@ class _SlideToConfirmState extends State<SlideToConfirm> {
           setState(() {
             isDragging = false;
             // Check confirmation thresholds
-            if (position <= 0.1) {
-              // Threshold for left confirmation
-              position = 0.0; // Snap to end
-              widget.onConfirmed(SlideDirection.left);
-            } else if (position >= 0.9) {
+            if (position >= 0.9) {
               // Threshold for right confirmation
               position = 1.0; // Snap to end
-              widget.onConfirmed(SlideDirection.right);
+              widget.onConfirmed(true); // Mark as completed
             } else {
-              // Return to center if not confirmed
-              position = 0.5;
+              // Return to start if not confirmed
+              position = 0.0;
             }
           });
         },
@@ -222,6 +139,26 @@ class _SlideToConfirmState extends State<SlideToConfirm> {
           child: Stack(
             children: [
               // Position the thumb based on the 'position' value
+
+              Row(
+                children: [
+                  SizedBox(width: 50 + _padding), // Left padding
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        'Meditated for 60 min',
+                        style: TextStyle(
+                          color: Colors.grey.shade400,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 50 + _padding), // Left padding
+                ],
+              ),
+
               AnimatedPositioned(
                 duration: Duration(
                     milliseconds: isDragging ? 0 : 200), // Animate snap back
@@ -229,32 +166,15 @@ class _SlideToConfirmState extends State<SlideToConfirm> {
                 left: _padding + position * trackWidth, // Calculate left offset
                 top: (60 - _thumbSize) / 2, // Center vertically
                 child: Container(
-                  width: _thumbSize,
-                  height: _thumbSize,
+                  width: 50,
+                  height: 50,
+                  margin: const EdgeInsets.only(left: 5),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    // Interpolate color from red to green based on position
-                    color: Color.lerp(
-                      Colors.red.shade700, // Start color (left)
-                      Theme.of(context).primaryColor, // End color (right)
-                      position, // Interpolation factor
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        // Interpolate shadow color as well
-                        color: Color.lerp(
-                          Colors.red.withOpacity(0.4),
-                          Theme.of(context).primaryColor.withOpacity(0.4),
-                          position,
-                        )!,
-                        blurRadius: 8,
-                        spreadRadius: 1,
-                      ),
-                    ],
+                    color: Color(0xff9ece04), // Bright green color from image
                   ),
-                  // Use the swipe icon
                   child:
-                      const Icon(Icons.touch_app_outlined, color: Colors.white),
+                      Icon(Icons.double_arrow, color: Colors.black, size: 28),
                 ),
               ),
             ],
