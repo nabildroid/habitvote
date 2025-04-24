@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev -e .env --ip 0.0.0.0",
-    "deploy:db": "wrangler d1 migrations apply vocafusion-auth --remote",
-    "deploy:localdb": "wrangler d1 migrations apply vocafusion-auth",
+    "deploy:db": "wrangler d1 migrations apply habitvote-auth --remote",
+    "deploy:localdb": "wrangler d1 migrations apply habitvote-auth",
     "deploy": "wrangler deploy --minify && npm run deploy:db",
     "generate": "drizzle-kit generate"
   },

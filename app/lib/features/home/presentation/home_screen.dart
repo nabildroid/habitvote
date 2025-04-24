@@ -2,12 +2,12 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:vocafusion/features/home/presentation/widgets/today_voters.dart';
+import 'package:habitvote/features/vote/presentation/widgets/today_voters.dart';
 
-import 'widgets/checkin_slider.dart';
+import '../../tracker/presentations/widgets/checkin_slider.dart';
 import 'widgets/custom_app_bar.dart';
-import 'widgets/habit_heatmap.dart';
-import 'widgets/social_overview.dart';
+import '../../tracker/presentations/widgets/habit_heatmap.dart';
+import '../../vote/presentation/widgets/social_overview.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -46,15 +46,8 @@ class _HomeScreenState extends State<HomeScreen> {
               TodayVotersWidget(),
               const SizedBox(height: 16),
               HabitHeatmapWidget(
-                habitDescription: 'Read 10 pages of a book',
-                habitName: 'Reading',
                 habitIcon: Icons.book,
                 startDayOfWeek: 0, // 0 = Sunday
-                completedDates: List.generate(0, (_) {
-                  // Generate a random number of days between 1 and 365
-                  final randomDays = 1 + Random().nextInt(365);
-                  return DateTime.now().subtract(Duration(days: randomDays));
-                }),
               ),
             ]),
           ),

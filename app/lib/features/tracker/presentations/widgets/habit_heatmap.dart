@@ -1,21 +1,17 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
+import 'package:habitvote/core/locator.dart';
+import 'package:habitvote/features/tracker/data/models/checkin_model.dart';
+import 'package:habitvote/features/tracker/data/repositories/habit_repository.dart';
+import 'package:habitvote/features/tracker/presentations/utils/habit_context_extension.dart';
 import 'package:intl/intl.dart';
 
 class HabitHeatmapWidget extends StatefulWidget {
-  final String habitName;
-  final String habitDescription;
   final IconData habitIcon;
-  final List<DateTime> completedDates;
   final int startDayOfWeek; // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
 
   const HabitHeatmapWidget({
     super.key,
-    this.completedDates = const [],
     this.startDayOfWeek = 1,
-    required this.habitName,
-    required this.habitDescription,
     required this.habitIcon, // Default to Monday
   });
 
@@ -150,16 +146,17 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
                   children: [
                     FittedBox(
                       child: Text(
-                        widget.habitName,
+                        context.habitState.habit!.name,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                     ),
                     FittedBox(
                       child: Text(
-                        widget.habitDescription,
+                        context.habitState.habit!.description,
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey,
@@ -171,7 +168,11 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
               ),
               const SizedBox(width: 12),
               InkWell(
-                // onTap: () => _showStatsBottomSheet(context),
+                onTap: () async {
+                  final habits = await locator.get<HabitRepo>().getAll();
+
+                  print(habits);
+                },
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
                   padding: const EdgeInsets.all(8),
@@ -279,6 +280,7 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
   }
 
   Widget _buildHabitHeatmap() {
+    context.watchHabitState.checkins;
     return GridView.builder(
       controller: _heatmapScrollController,
       scrollDirection: Axis.horizontal,
@@ -300,34 +302,77 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
         // Check if this date is today
         final bool isToday = _isToday(cellDate);
 
-        // Check if this date is in the completed list
-        final bool isCompleted = _isCompletedDate(cellDate);
-
-        // Check if this date is in the future
+        // Don't allow interactions with future dates
         final bool isFuture = cellDate.isAfter(_today);
 
-        return Container(
-          width: 30,
-          height: 30,
-          decoration: BoxDecoration(
-            color: _getCellColor(context, isCompleted, isToday, isFuture),
-            borderRadius: BorderRadius.circular(4),
-            border: isToday ? Border.all(color: Colors.white, width: 2) : null,
+        // Get check-in status for this date directly from HabitTrackerState
+        final checkin = _getCheckInForDate(context, cellDate);
+        final bool isCompleted = checkin != null && checkin.isDone;
+        final bool isFailed = checkin != null && !checkin.isDone;
+
+        return GestureDetector(
+          onTap: isFuture ? null : () => _handleTap(context, cellDate, checkin),
+          onLongPress: checkin == null || isFuture
+              ? null
+              : () => _handleLongPress(context, cellDate),
+          child: Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: _getCellColor(
+                  context, isCompleted, isFailed, isToday, isFuture),
+              borderRadius: BorderRadius.circular(4),
+              border:
+                  isToday ? Border.all(color: Colors.white, width: 2) : null,
+            ),
+            child: isToday
+                ? Center(
+                    child: Text(
+                      cellDate.day.toString(),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  )
+                : null,
           ),
-          child: isToday
-              ? Center(
-                  child: Text(
-                    cellDate.day.toString(),
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold),
-                  ),
-                )
-              : null,
         );
       },
     );
+  }
+
+  // Get check-in for a specific date from the state
+  CheckinModel? _getCheckInForDate(BuildContext context, DateTime date) {
+    return context.habitState.checkins
+        .where(
+          (e) =>
+              e.date.year == date.year &&
+              e.date.month == date.month &&
+              e.date.day == date.day,
+        )
+        .firstOrNull;
+  }
+
+  // Handle tap on a cell
+  void _handleTap(
+      BuildContext context, DateTime date, CheckinModel? existingCheckin) {
+    if (existingCheckin == null) {
+      // First tap - mark as completed (done=true)
+      context.habitCubit.checkIn(isDone: true, date: date);
+    } else if (existingCheckin.isDone) {
+      // Second tap - change to failed (done=false)
+      context.habitCubit.undoCheckIn(date: date);
+      context.habitCubit.checkIn(isDone: false, date: date);
+    } else {
+      // Third tap (on failed) - remove check-in
+      context.habitCubit.undoCheckIn(date: date);
+    }
+  }
+
+  // Handle long press - remove check-in
+  void _handleLongPress(BuildContext context, DateTime date) {
+    context.habitCubit.undoCheckIn(date: date);
   }
 
   bool _isToday(DateTime date) {
@@ -336,21 +381,18 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
         date.day == _today.day;
   }
 
-  bool _isCompletedDate(DateTime date) {
-    return widget.completedDates.any((completedDate) =>
-        completedDate.year == date.year &&
-        completedDate.month == date.month &&
-        completedDate.day == date.day);
-  }
-
-  Color _getCellColor(
-      BuildContext context, bool isCompleted, bool isToday, bool isFuture) {
+  Color _getCellColor(BuildContext context, bool isCompleted, bool isFailed,
+      bool isToday, bool isFuture) {
     if (isFuture) {
       return Colors.grey.shade900; // Very dark for future dates
     }
 
     if (isCompleted) {
       return Theme.of(context).primaryColor;
+    }
+
+    if (isFailed) {
+      return Colors.red.shade700; // Color for failed check-ins
     }
 
     return Colors.grey.shade800;

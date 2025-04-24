@@ -5,7 +5,7 @@
 
 
 ### Todo
-- [ ] Make the Empty screen (fresh home)
+- [X] Make the Empty screen (fresh home)
 - [ ] Make the habit tracker works
 ------------------------
 - [ ] Add Onboarding Screens

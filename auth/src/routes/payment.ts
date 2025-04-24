@@ -83,8 +83,8 @@ PaymentAPI.get("/:uid/:productId", async (c) => {
             },
         ],
         mode: 'payment',
-        success_url: "https://vocafusion.laknabil.me/success",
-        cancel_url: "https://vocafusion.laknabil.me/error",
+        success_url: "https://habitvote.laknabil.me/success",
+        cancel_url: "https://habitvote.laknabil.me/error",
         metadata: {
             uid,
             productId: target?.basePlanId ?? productId,

@@ -1,4 +1,4 @@
-name: vocafusion
+name: habitvote
 description: "application for learning new vocabulary through a stroies"
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
