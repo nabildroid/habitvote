@@ -10,6 +10,8 @@ import 'package:habitvote/features/tracker/data/repositories/habit_repository.da
 import 'package:habitvote/features/tracker/data/sources/habit_cache.dart';
 import 'package:habitvote/services/kv_service.dart';
 
+import '../features/user/data/auth_service.dart';
+
 final GetIt locator = GetIt.instance;
 
 Future<void> setUpLocator({required Database sembastInstance}) async {
@@ -21,6 +23,8 @@ Future<void> setUpLocator({required Database sembastInstance}) async {
   locator.registerFactory(() => HabitTrackerRepo(cache: TrackerCache()));
 
   locator.registerFactory(() => VotesRepo(cache: VotesCache()));
+
+  locator.registerSingleton(AuthService());
 
   locator.registerSingleton(RouteObserver<ModalRoute<dynamic>>());
 }

@@ -8,7 +8,7 @@
 - [X] Make the Empty screen (fresh home)
 - [X] Make the habit tracker works
 ------------------------
-- [ ] google Auth
+- [X] google Auth
 - [ ] Add Onboarding Screens
 ------------------------
 - [ ] Ability to vote for people to activate todays votes (make the votes visible)

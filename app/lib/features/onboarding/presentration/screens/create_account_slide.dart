@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:habitvote/core/locator.dart';
+import 'package:habitvote/features/user/data/auth_service.dart';
 
 import '../widgets/brilliant_ok_button.dart';
 
@@ -37,15 +39,10 @@ class CreateAccountSlide extends StatelessWidget {
               // await InAppPurchase.instance.restorePurchases();
               // context.go("/home");
 
-              final _googleSignIn = GoogleSignIn(
-                // Optional clientId
-                // clientId: 'your-client_id.apps.googleusercontent.com',
-                scopes: [],
-              );
+              final accessToken =
+                  await locator.get<AuthService>().loginWithGoogle();
 
-              final user = await _googleSignIn.signIn();
-
-              print(user);
+              print(accessToken);
 
               // print(user);
             },
