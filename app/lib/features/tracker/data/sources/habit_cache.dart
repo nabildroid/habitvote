@@ -36,18 +36,21 @@ extension HabitLoader on HabitCache {
       HabitModel(
         id: "1",
         name: "Drink Water",
+        publicName: "Drink Water",
         description: "Stay hydrated by drinking enough water.",
         isNegative: false,
       ),
       HabitModel(
         id: "2",
         name: "Exercise",
+        publicName: "Exercise",
         description: "Engage in physical activity regularly.",
         isNegative: false,
       ),
       HabitModel(
         id: "3",
         name: "Read Books",
+        publicName: "Read Books",
         description: "Spend time reading books for knowledge and relaxation.",
         isNegative: false,
       ),

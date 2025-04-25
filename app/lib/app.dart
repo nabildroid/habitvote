@@ -6,6 +6,7 @@ import 'package:habitvote/core/custom_router.dart';
 import 'package:habitvote/features/vote/application/votes_cubit.dart';
 
 import 'core/locator.dart';
+import 'features/onboarding/application/cubits/onboarding_cubit.dart';
 import 'features/tracker/application/cubits/habit_tracker_cubit.dart';
 
 class HabitVoteApp extends StatelessWidget {
@@ -17,6 +18,7 @@ class HabitVoteApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (ctx) => HabitTrackerCubit()),
         BlocProvider(create: (ctx) => VotesCubit()),
+        BlocProvider(create: (ctx) => OnboardingCubit()),
       ],
       child: MaterialApp.router(
         localizationsDelegates: [

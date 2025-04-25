@@ -59,6 +59,7 @@ class HabitTrackerCubit extends Cubit<HabitTrackerState> {
   HabitTrackerCubit()
       : super(HabitTrackerState(
           habit: HabitModel(
+            publicName: "Hello",
             id: 'aaa',
             name: 'Reading',
             description: 'Read 10 Pages a day',

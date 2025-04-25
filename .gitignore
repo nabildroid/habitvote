@@ -192,3 +192,6 @@
 
 **/**/app/build/**
 **/**/app/build/.**
+
+
+google-services.json

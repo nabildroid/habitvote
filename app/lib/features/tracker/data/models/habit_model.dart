@@ -9,6 +9,9 @@ class HabitModel extends Equatable {
   /// Short name/title of the habit
   final String name;
 
+  /// if Gemini think of the name as something bad, the public name is the good (AI generated) version
+  final String publicName;
+
   /// Brief description of the habit
   final String description;
 
@@ -20,6 +23,7 @@ class HabitModel extends Equatable {
     required this.name,
     required this.description,
     required this.isNegative,
+    required this.publicName,
     DateTime? createdAt,
   }) : id = id ?? const Uuid().v4();
 
@@ -30,6 +34,7 @@ class HabitModel extends Equatable {
       'name': name,
       'description': description,
       'isNegative': isNegative,
+      'publicName': publicName,
     };
   }
 
@@ -37,6 +42,7 @@ class HabitModel extends Equatable {
   factory HabitModel.fromJson(Map<String, dynamic> json) {
     return HabitModel(
       id: json['id'],
+      publicName: json['publicName'],
       name: json['name'],
       description: json['description'],
       isNegative: json['isNegative'],
