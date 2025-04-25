@@ -56,6 +56,7 @@ dependencies:
   flutter_launcher_icons:
   fsrs:
   flutter_markdown:
+  fl_chart:
   scrollable_positioned_list:
   intrinsic_dimension:
   jwt_decoder:
