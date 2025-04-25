@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:habitvote/core/custom_router.dart';
+import 'package:habitvote/features/vote/application/votes_cubit.dart';
 
 import 'core/locator.dart';
 import 'features/tracker/application/cubits/habit_tracker_cubit.dart';
@@ -15,6 +16,7 @@ class HabitVoteApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (ctx) => HabitTrackerCubit()),
+        BlocProvider(create: (ctx) => VotesCubit()),
       ],
       child: MaterialApp.router(
         localizationsDelegates: [

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
 
 class TodayVotersWidget extends StatefulWidget {
   // add empty-state toggle
@@ -56,6 +57,7 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
                     label: 'Challengers',
                     description: 'They Say You Can\'t',
                     isPositive: false,
+                    count: context.voteState.today?.down ?? 0,
                   ),
                   const SizedBox(width: 16),
                   _buildVoteTypeWidget(
@@ -63,6 +65,7 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
                     label: 'Believers',
                     description: 'They Say You Can',
                     isPositive: true,
+                    count: context.voteState.today?.down ?? 0,
                   ),
                 ],
               )
@@ -82,7 +85,10 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
     String? description,
     int count = 88, // Example count for visual effect
   }) {
-    final showDescription = description != null && widget.showEmpty;
+    final showEmpty = context.watchVoteState.votes.length < 2 &&
+        (context.voteState.today?.total ?? 0) == 0;
+
+    final showDescription = showEmpty && description != null;
     // Use IntrinsicWidth to make the column take the width of its widest child
     return IntrinsicWidth(
       child: Column(
@@ -154,6 +160,9 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
   }
 
   Widget _buildVoteCircle() {
+    final showEmpty = context.watchVoteState.votes.length < 2 &&
+        (context.voteState.today?.total ?? 0) == 0;
+
     return Container(
       width: 120,
       height: 120,
@@ -200,7 +209,7 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
             ),
           ),
           // Vote count
-          if (widget.showEmpty)
+          if (showEmpty)
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -216,6 +225,7 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
                 const Text(
@@ -227,12 +237,12 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
                 ),
               ],
             ),
-          if (!widget.showEmpty)
+          if (!showEmpty)
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  '30',
+                Text(
+                  context.voteState.today?.total.toString() ?? "0",
                   style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,

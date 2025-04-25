@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:habitvote/features/tracker/data/repositories/habit_tracker_repository.dart';
 import 'package:habitvote/features/tracker/data/sources/tracker_cache.dart';
+import 'package:habitvote/features/vote/data/repositories/votes_repository.dart';
+import 'package:habitvote/features/vote/data/sources/votes_cache.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
 import 'package:habitvote/features/tracker/data/repositories/habit_repository.dart';
@@ -17,6 +19,8 @@ Future<void> setUpLocator({required Database sembastInstance}) async {
 
   locator.registerFactory(() => HabitRepo(cache: HabitCache()));
   locator.registerFactory(() => HabitTrackerRepo(cache: TrackerCache()));
+
+  locator.registerFactory(() => VotesRepo(cache: VotesCache()));
 
   locator.registerSingleton(RouteObserver<ModalRoute<dynamic>>());
 }

@@ -43,7 +43,9 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(children: [
               SocialOverview(),
               const SizedBox(height: 24),
-              TodayVotersWidget(),
+              TodayVotersWidget(
+                showEmpty: true,
+              ),
               const SizedBox(height: 16),
               HabitHeatmapWidget(
                 habitIcon: Icons.book,

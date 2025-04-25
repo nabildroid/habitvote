@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:habitvote/features/tracker/application/cubits/habit_tracker_cubit.dart';
+import 'package:habitvote/features/tracker/data/repositories/habit_tracker_repository.dart';
+import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
 
 class SocialOverview extends StatelessWidget {
   const SocialOverview({super.key});
 
-  Widget _buildSocialProof() {
+  Widget _buildSocialProof(BuildContext context) {
+    final votes = context.voteState.votes.where((e) => e.isActivated).toList();
+
+    final checkIn = context.read<HabitTrackerCubit>().state.checkins;
+    // todo compare the checkin date with the vote date
+    final positive = votes.fold(0, (int sum, e) => sum + e.up);
+    final negative = votes.fold(0, (int sum, e) => sum + e.down);
+
     return RichText(
       text: TextSpan(
         style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
         children: [
           const TextSpan(text: 'You proved '),
           TextSpan(
-            text: '100 person wrong',
+            text: '$negative person wrong',
             style: TextStyle(
               color: Colors.grey.shade200,
               fontWeight: FontWeight.bold,
@@ -18,7 +29,7 @@ class SocialOverview extends StatelessWidget {
           ),
           const TextSpan(text: ' and gained '),
           TextSpan(
-            text: '50 believers',
+            text: '$positive believers',
             style: TextStyle(
               color: Colors.grey.shade200,
               fontWeight: FontWeight.bold,
@@ -61,7 +72,9 @@ class SocialOverview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: _buildNoSocialProof(),
+      child: context.voteState.votes.length > 4
+          ? _buildSocialProof(context)
+          : _buildNoSocialProof(),
     );
   }
 }

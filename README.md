@@ -6,7 +6,7 @@
 
 ### Todo
 - [X] Make the Empty screen (fresh home)
-- [ ] Make the habit tracker works
+- [X] Make the habit tracker works
 ------------------------
 - [ ] Add Onboarding Screens
 - [ ] google Auth
