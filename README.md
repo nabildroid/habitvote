@@ -11,8 +11,8 @@
 - [X] google Auth
 - [X] Add Onboarding Screens
 ------------------------
-- [ ] Save Habit
-- [ ] Save Records
+- [X] Save Habit
+- [X] Save Records
 ------------------------
 - [ ] Ability to vote for people to activate todays votes (make the votes visible)
 - [ ] Generate Random Bot Votes to everyone
