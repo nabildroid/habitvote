@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:habitvote/core/locator.dart';
 import 'package:habitvote/features/vote/data/models/vote_model.dart';
+import 'package:habitvote/features/vote/data/repositories/votes_repository.dart';
 
 class VotesState {
   final List<VoteModel> votes;
@@ -30,5 +34,10 @@ class VotesState {
 }
 
 class VotesCubit extends Cubit<VotesState> {
+  final VotesRepo repo = locator.get();
   VotesCubit() : super(VotesState.initial());
+
+  init() async {
+    unawaited(repo.remote.attendVoting());
+  }
 }

@@ -39,14 +39,12 @@ class UserModel extends Equatable {
   final String email;
   final String displayName;
   final String? photoURL;
-  final String nativeLanguage;
   final UserClaimsModel claims;
 
   final DateTime createdAt;
 
   const UserModel({
     required this.uid,
-    required this.nativeLanguage,
     required this.createdAt,
     this.photoURL,
     this.displayName = 'User',
@@ -58,7 +56,6 @@ class UserModel extends Equatable {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       uid: json['uid'],
-      nativeLanguage: json['nativeLanguage'],
       createdAt: DateTime.parse(json['createdAt']),
       displayName: json['displayName'] ?? 'User',
       photoURL: json['photoURL'],
@@ -82,7 +79,6 @@ class UserModel extends Equatable {
       claims: UserClaimsModel(
         premiumExpires: DateTime.now().add(const Duration(days: 30)),
       ),
-      nativeLanguage: nativeLanguage,
     );
   }
 

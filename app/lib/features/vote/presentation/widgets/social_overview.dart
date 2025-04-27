@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:habitvote/features/tracker/application/cubits/habit_tracker_cubit.dart';
-import 'package:habitvote/features/tracker/data/repositories/habit_tracker_repository.dart';
+import 'package:habitvote/features/habit/application/cubits/habit_tracker_cubit.dart';
+import 'package:habitvote/features/habit/data/repositories/tracker_repository.dart';
 import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
 
 class SocialOverview extends StatelessWidget {

@@ -1,1 +1,0 @@
-ALTER TABLE `users` ADD `nativeLanguage` text NOT NULL;

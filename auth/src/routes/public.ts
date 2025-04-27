@@ -21,7 +21,6 @@ PublicAPI.use('*', cors())
 
 const LoginWithGoogleSchmema = z.object({
     accessToken: z.string(),
-    nativeLanguage: z.string().optional(),
 });
 
 
@@ -32,7 +31,7 @@ PublicAPI.post("/loginWithGoogle", async (c) => {
         return c.json({ success: false, error: "Rate limit exceeded" }, { status: 429 })
     }
 
-    const { accessToken, nativeLanguage } = LoginWithGoogleSchmema.parse(await c.req.json());
+    const { accessToken } = LoginWithGoogleSchmema.parse(await c.req.json());
     if (!accessToken) {
         return c.json({ success: false, error: "Missing AccessToken" }, { status: 401 })
     }
@@ -49,7 +48,6 @@ PublicAPI.post("/loginWithGoogle", async (c) => {
             email: googleUser.email,
             displayName: googleUser.name,
             photoUrl: googleUser.picture,
-            nativeLanguage: nativeLanguage!
         }).returning()
 
         user = query[0];

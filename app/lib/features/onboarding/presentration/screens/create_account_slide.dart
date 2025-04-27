@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:habitvote/core/locator.dart';
+import 'package:habitvote/features/habit/application/cubits/habit_tracker_cubit.dart';
+import 'package:habitvote/features/habit/utils/onboarding_habit_register_extension.dart';
+import 'package:habitvote/features/onboarding/application/cubits/onboarding_cubit.dart';
 import 'package:habitvote/features/user/data/auth_service.dart';
+import 'package:habitvote/features/user/utils/onboarding_signup_extension.dart';
 
 import '../widgets/brilliant_ok_button.dart';
 
@@ -16,35 +21,25 @@ class CreateAccountSlide extends StatelessWidget {
       child: Column(
         children: [
           Text("Create Account",
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   )),
           Spacer(),
           SizedBox(height: 20),
           Text(
-            "137 Language Learners sign in today",
+            "137 Habit trackers sign in today",
           ),
           SizedBox(height: 4),
           BrilliantOkButton(
             tag: "continue",
             onPressed: () async {
-              // final nativeLangauge =
-              //     context.read<OnboardingCubit>().state.nativeLanguage;
+              await context.read<OnboardingCubit>().signupWithGoogle();
+              await context.read<OnboardingCubit>().registerHabit();
 
-              // final user = await locator<UserRepository>()
-              //     .loginWithGoogle(nativeLanguage: nativeLangauge);
+              await context.read<HabitTrackerCubit>().init(fresh: true);
 
-              // await Future.delayed(Duration(seconds: 1));
-              // await InAppPurchase.instance.restorePurchases();
-              // context.go("/home");
-
-              final accessToken =
-                  await locator.get<AuthService>().loginWithGoogle();
-
-              print(accessToken);
-
-              // print(user);
+              context.go("/home");
             },
             text: "Sign in with Google",
           ),

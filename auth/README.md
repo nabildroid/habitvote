@@ -1,15 +1,17 @@
-# auth
+## Auth
 
-To install dependencies:
+provides
 
-```bash
-bun install
-```
 
-To run:
+=> jwt managment
 
-```bash
-bun run index.ts
-```
+=> Login with Google
 
-This project was created using `bun init` in bun v1.2.0. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+=> Payment via Stripe
+
+=> Google Play Payment information 
+
+=> Service to Service API for managing users
+
+
+

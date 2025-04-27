@@ -7,74 +7,55 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 class OnboardingState extends Equatable {
-  final String? nativeLanguage;
-  final String? targetLanguage;
-  final int? languageLevel;
   final String? age;
   final String? gender;
-  final String? selectedTopic;
+  final int? commitmentLevel; // Renamed from languageLevel
+  final bool? usedOtherApps; // New property
+  final String? habitType; // New property: "good" or "bad"
+  final String? selectedHabit; // New property
 
   const OnboardingState({
-    this.nativeLanguage,
-    this.targetLanguage,
-    this.languageLevel,
     this.age,
     this.gender,
-    this.selectedTopic,
+    this.commitmentLevel,
+    this.usedOtherApps,
+    this.habitType,
+    this.selectedHabit,
   });
 
   OnboardingState copyWith({
-    String? identifyAs,
-    String? grade,
-    List<String>? focusOn,
-    int? desiredDuration,
-    bool? skipLearning,
-    String? nativeLanguage,
-    String? targetLanguage,
-    int? languageLevel,
     String? age,
     String? gender,
-    String? selectedTopic,
+    int? commitmentLevel,
+    bool? usedOtherApps,
+    String? habitType,
+    String? selectedHabit,
   }) {
     return OnboardingState(
-      nativeLanguage: nativeLanguage ?? this.nativeLanguage,
-      targetLanguage: targetLanguage ?? this.targetLanguage,
-      languageLevel: languageLevel ?? this.languageLevel,
       age: age ?? this.age,
       gender: gender ?? this.gender,
-      selectedTopic: selectedTopic ?? this.selectedTopic,
+      commitmentLevel: commitmentLevel ?? this.commitmentLevel,
+      usedOtherApps: usedOtherApps ?? this.usedOtherApps,
+      habitType: habitType ?? this.habitType,
+      selectedHabit: selectedHabit ?? this.selectedHabit,
     );
   }
 
   @override
   List<Object?> get props => [
-        nativeLanguage,
-        targetLanguage,
-        languageLevel,
         age,
         gender,
-        selectedTopic,
+        commitmentLevel,
+        usedOtherApps,
+        habitType,
+        selectedHabit,
       ];
 }
 
 class OnboardingCubit extends HydratedCubit<OnboardingState> {
-  OnboardingCubit() : super(OnboardingState());
+  OnboardingCubit() : super(const OnboardingState());
 
-  // New methods for onboarding screen
-  void setNativeLanguage(String language) {
-    emit(state.copyWith(nativeLanguage: language));
-  }
-
-  void setTargetLanguage(String language) {
-    emit(state.copyWith(targetLanguage: language));
-  }
-
-  void setLanguageLevel(int level) {
-    emit(state.copyWith(languageLevel: level));
-
-    // by hear, we can register the user!
-  }
-
+  // Keep relevant methods
   void setAge(String age) {
     emit(state.copyWith(age: age));
   }
@@ -83,38 +64,51 @@ class OnboardingCubit extends HydratedCubit<OnboardingState> {
     emit(state.copyWith(gender: gender));
   }
 
+  // Add new methods
+  void setCommitmentLevel(int level) {
+    emit(state.copyWith(commitmentLevel: level));
+  }
+
+  void setUsedOtherApps(bool used) {
+    emit(state.copyWith(usedOtherApps: used));
+  }
+
+  void setHabitType(String type) {
+    // Consider adding validation for "good" or "bad" if needed
+    emit(state.copyWith(habitType: type));
+  }
+
+  void setSelectedHabit(String? habit) {
+    // Allow null in case custom text is cleared
+    emit(state.copyWith(selectedHabit: habit));
+  }
+
   @override
   void onChange(Change<OnboardingState> change) {
     super.onChange(change);
   }
 
-  void setSelectedRootFlow(dynamic rootFlow) {}
-
-  void setSelectedTopic(String topic) {
-    emit(state.copyWith(selectedTopic: topic));
-  }
-
   @override
   OnboardingState? fromJson(Map<String, dynamic> json) {
     return OnboardingState(
-      nativeLanguage: json["nativeLanguage"],
-      targetLanguage: json["targetLanguage"],
-      languageLevel: json["languageLevel"],
       age: json["age"],
       gender: json["gender"],
-      selectedTopic: json["selectedTopic"],
+      commitmentLevel: json["commitmentLevel"],
+      usedOtherApps: json["usedOtherApps"],
+      habitType: json["habitType"],
+      selectedHabit: json["selectedHabit"],
     );
   }
 
   @override
   Map<String, dynamic>? toJson(OnboardingState state) {
     return {
-      "nativeLanguage": state.nativeLanguage,
-      "targetLanguage": state.targetLanguage,
-      "languageLevel": state.languageLevel,
       "age": state.age,
       "gender": state.gender,
-      "selectedTopic": state.selectedTopic,
+      "commitmentLevel": state.commitmentLevel,
+      "usedOtherApps": state.usedOtherApps,
+      "habitType": state.habitType,
+      "selectedHabit": state.selectedHabit,
     };
   }
 }

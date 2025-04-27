@@ -4,13 +4,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:habitvote/features/onboarding/presentration/screens/create_account_slide.dart';
 import 'package:habitvote/features/onboarding/presentration/widgets/habitVoteDifference.dart';
 import 'package:habitvote/features/onboarding/presentration/widgets/brilliant_ok_button.dart';
 import 'package:intl/intl.dart'; // Import for date formatting
 
 import '../../application/cubits/onboarding_cubit.dart';
-// Assuming OnboardingState has a 'selectedHabit' property and OnboardingCubit has a 'setHabit' method.
-// import '../../application/cubits/onboarding_state.dart';
+// Removed unused import
 import '../widgets/selectable_option.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -23,22 +23,18 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final controller = PageController();
   // totalInteractiveSteps remains 9 if TopicChooser is replaced by CustomPlanSlide
-  final int totalInteractiveSteps = 9;
+  // Let's keep totalSteps as the total number of pages (0-indexed)
+  final int totalSteps = 10; // 0 to 9
 
   void next() {
-    // Adjust the page count check if CreateAccountSlide is the last step
-    // Now check against the updated totalSteps
-    if (controller.page == totalInteractiveSteps) {
-      context.push("/register");
-      return;
-    } else {
-      controller.nextPage(
-        duration: Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
-      );
-    }
+    // Navigate to register on the last step (CreateAccountSlide)
 
-    setState(() {});
+    controller.nextPage(
+      duration: Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
+    );
+
+    setState(() {}); // Rebuild to update progress bar potentially
   }
 
   @override
@@ -67,9 +63,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             widthFactor: 0.9,
             child: Center(
               child: Builder(builder: (context) {
-                // Use updated totalSteps for progress calculation
-                final progress =
-                    ((controller.page ?? 0) + 1) / totalInteractiveSteps;
+                // Use totalSteps for progress calculation
+                final progress = ((controller.page ?? 0) + 1) / totalSteps;
                 return LinearProgressIndicator(
                   value: progress,
                   backgroundColor: Colors.grey.shade300,
@@ -89,73 +84,81 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               GenderChooser(), // 0
               CommitmentQuestion(), // 1
               OtherAppsUsage(), // 2
-              HabitVoteDifference(), // 3
+              HabitVoteDifference(), // 3 - No input needed
               HabitCategoryChooser(), // 4
               HabitChooser(), // 5
               AgeGroupSelector(), // 6
-              // Replace TopicChooser with CustomPlanSlide
-              CustomPlanSlide(), // 7
-              ThankYouSlide(), // 8
-              SetupProgressSlide(), // 9 (Auto-navigates)
+              ThankYouSlide(), // 7 - No input needed
+              SetupProgressSlide(
+                onComplete: () => controller.nextPage(
+                  duration: Duration(milliseconds: 350),
+                  curve: Curves.easeInOut,
+                ),
+              ), // 8 - No input needed
+              CustomPlanSlide(), // 9 - No input needed
+              CreateAccountSlide(), // 10 - Leads to registration
+              // Removed SetupProgressSlide as it seems replaced or unused
             ],
           ),
         ),
         persistentFooterButtons: [
           BlocListener<OnboardingCubit, OnboardingState>(
-            listener: (context, state) {},
+            listener: (context, state) {
+              // Optional: Trigger rebuild if needed based on state changes affecting button
+              setState(() {});
+            },
             child: AnimatedBuilder(
                 animation: controller,
                 builder: (context, _) {
+                  // Use BlocBuilder here for direct access to state for button logic
                   return BlocBuilder<OnboardingCubit, OnboardingState>(
                       builder: (context, state) {
-                    bool allowControll = true;
+                    bool allowControl =
+                        true; // Default to true for non-input slides
                     int currentPage = controller.page?.round() ?? 0;
 
-                    // Update page indices based on the new order
+                    // Enable/disable based on current page's required state
                     if (currentPage == 0) {
                       // GenderChooser
-                      allowControll = state.gender != null;
+                      allowControl = state.gender != null;
                     } else if (currentPage == 1) {
                       // CommitmentQuestion
-                      allowControll = state.languageLevel != null;
+                      allowControl = state.commitmentLevel != null;
                     } else if (currentPage == 2) {
                       // OtherAppsUsage
-                      allowControll = true;
-                    } else if (currentPage == 3) {
-                      // HabitVoteDifference
-                      allowControll = true;
+                      allowControl = state.usedOtherApps != null;
                     } else if (currentPage == 4) {
                       // HabitCategoryChooser
-                      allowControll = true;
+                      allowControl = state.habitType != null;
                     } else if (currentPage == 5) {
                       // HabitChooser
-                      // allowControll = state.selectedHabit != null && state.selectedHabit!.isNotEmpty;
+                      allowControl = state.selectedHabit != null &&
+                          state.selectedHabit!.isNotEmpty;
                     } else if (currentPage == 6) {
                       // AgeGroupSelector
-                      allowControll = state.age != null;
-                    } else if (currentPage == 7) {
-                      // CustomPlanSlide (new index)
-                      allowControll =
-                          true; // Always allow moving from plan slide
-                    } else if (currentPage == 8) {
-                      // ThankYouSlide (new index)
-                      allowControll = true;
+                      allowControl = state.age != null;
                     }
+                    // Pages 3, 7, 8 don't require input, allowControl remains true.
+                    // Page 9 (CreateAccountSlide) has specific button text.
 
-                    // Hide button on the final SetupProgressSlide (index 9)
-                    if (currentPage >= totalInteractiveSteps) {
+                    // Hide button if controller is not ready
+                    if (!controller.hasClients ||
+                        currentPage == 8 ||
+                        currentPage == 10) {
                       return SizedBox.shrink();
                     }
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 28.0),
                       child: BrilliantOkButton(
-                        // Text changes on the last interactive slide (ThankYouSlide)
-                        text: currentPage == totalInteractiveSteps - 1
-                            ? "Finish Setup"
-                            : "Next",
+                        // Text changes on the last slide before registration
+                        text: currentPage == 7
+                            ? "Create my plan"
+                            : currentPage == 9
+                                ? "Let's get started!"
+                                : "Next",
                         tag: "continue",
-                        disabled: !allowControll,
+                        disabled: !allowControl,
                         onPressed: next,
                       ),
                     );
@@ -166,84 +169,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-class TargetLanguageChooser extends StatefulWidget {
-  const TargetLanguageChooser({super.key});
-
-  @override
-  State<TargetLanguageChooser> createState() => _TargetLanguageChooserState();
-}
-
-class _TargetLanguageChooserState extends State<TargetLanguageChooser> {
-  final List<String> _languages = [
-    'English',
-    'Spanish',
-    'French',
-    'German',
-    'Italian',
-    'Portuguese',
-    'Russian',
-    'Japanese',
-    'Turkish',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Choose Target Language",
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  )),
-          SizedBox(height: 16),
-          Text(
-              "This will be the language you are about to learn +1000 new words in",
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.black87,
-                  )),
-          SizedBox(height: 20),
-          Expanded(
-            child: BlocBuilder<OnboardingCubit, OnboardingState>(
-                builder: (context, state) {
-              return ListView.builder(
-                itemCount: _languages.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: SelectableOption(
-                      isSelected: state.targetLanguage == _languages[index],
-                      onSelected: () {
-                        context
-                            .read<OnboardingCubit>()
-                            .setTargetLanguage(_languages[index]);
-                      },
-                      child: Center(child: Text(_languages[index])),
-                    ),
-                  );
-                },
-              );
-            }),
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class HabitCategoryChooser extends StatefulWidget {
+class HabitCategoryChooser extends StatelessWidget {
+  // Changed to StatelessWidget
   const HabitCategoryChooser({super.key});
 
   @override
-  State<HabitCategoryChooser> createState() => HabitCategoryChooserState();
-}
-
-class HabitCategoryChooserState extends State<HabitCategoryChooser> {
-  @override
   Widget build(BuildContext context) {
-    final target = context.read<OnboardingCubit>().state.targetLanguage;
+    // final target = context.read<OnboardingCubit>().state.targetLanguage; // Removed
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
@@ -257,39 +189,54 @@ class HabitCategoryChooserState extends State<HabitCategoryChooser> {
           Expanded(child: BlocBuilder<OnboardingCubit, OnboardingState>(
               builder: (context, state) {
             return Column(
-              spacing: 12,
+              // spacing: 12, // Use Padding instead
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SelectableOption(
-                  isSelected: false,
-                  onSelected: () {},
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                          backgroundColor: Colors.white,
-                          child: Icon(
-                            Icons.back_hand_sharp,
-                            color: Colors.black,
-                          )),
-                      SizedBox(width: 16),
-                      Text(
-                        "I want to Stop BAD habit",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: SelectableOption(
+                    isSelected: state.habitType == "bad", // Check state
+                    onSelected: () {
+                      context
+                          .read<OnboardingCubit>()
+                          .setHabitType("bad"); // Update state
+                    },
+                    child: Row(
+                      children: [
+                        // ... Icon and Text ...
+                        CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Icon(
+                              Icons
+                                  .back_hand_sharp, // Consider a 'stop' or 'negative' icon
+                              color: Colors.black,
+                            )),
+                        SizedBox(width: 16),
+                        Text(
+                          "I want to Stop BAD habit",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 SelectableOption(
-                  isSelected: false,
-                  onSelected: () {},
+                  isSelected: state.habitType == "good", // Check state
+                  onSelected: () {
+                    context
+                        .read<OnboardingCubit>()
+                        .setHabitType("good"); // Update state
+                  },
                   child: Row(
                     children: [
+                      // ... Icon and Text ...
                       CircleAvatar(
                           backgroundColor: Colors.white,
                           child: Icon(
-                            Icons.gpp_good,
+                            Icons
+                                .gpp_good, // Consider a 'start' or 'positive' icon
                             color: Colors.black,
                           )),
                       SizedBox(width: 16),
@@ -311,15 +258,12 @@ class HabitCategoryChooserState extends State<HabitCategoryChooser> {
   }
 }
 
-class AgeGroupSelector extends StatefulWidget {
+class AgeGroupSelector extends StatelessWidget {
+  // Changed to StatelessWidget
   const AgeGroupSelector({super.key});
 
-  @override
-  State<AgeGroupSelector> createState() => AgeGroupSelectorState();
-}
-
-class AgeGroupSelectorState extends State<AgeGroupSelector> {
-  final List<String> _ages = [
+  final List<String> _ages = const [
+    // Made const
     'Under 18',
     '18-24',
     '25-34',
@@ -335,14 +279,14 @@ class AgeGroupSelectorState extends State<AgeGroupSelector> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ... Title and Subtitle ...
           Text("Choose Your Age",
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   )),
           SizedBox(height: 16),
-          Text(
-              "So we can Pick you the most interesting topics that keep you engage with with language",
+          Text("This helps us tailor the experience.", // Simplified text
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.black87,
                   )),
@@ -353,14 +297,17 @@ class AgeGroupSelectorState extends State<AgeGroupSelector> {
               return ListView.builder(
                 itemCount: _ages.length,
                 itemBuilder: (context, index) {
+                  final ageOption = _ages[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
                     child: SelectableOption(
-                      isSelected: state.age == _ages[index],
+                      isSelected: state.age == ageOption, // Check state
                       onSelected: () {
-                        context.read<OnboardingCubit>().setAge(_ages[index]);
+                        context
+                            .read<OnboardingCubit>()
+                            .setAge(ageOption); // Update state
                       },
-                      child: Center(child: Text(_ages[index])),
+                      child: Center(child: Text(ageOption)),
                     ),
                   );
                 },
@@ -373,14 +320,10 @@ class AgeGroupSelectorState extends State<AgeGroupSelector> {
   }
 }
 
-class GenderChooser extends StatefulWidget {
+class GenderChooser extends StatelessWidget {
+  // Changed to StatelessWidget
   const GenderChooser({super.key});
 
-  @override
-  State<GenderChooser> createState() => GenderChooserState();
-}
-
-class GenderChooserState extends State<GenderChooser> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -388,14 +331,14 @@ class GenderChooserState extends State<GenderChooser> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ... Title and Subtitle ...
           Text("Choose Your Gender",
               style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   )),
           SizedBox(height: 16),
-          Text(
-              "We will Select The most interesting Topics that provides better contexts for learning",
+          Text("This helps personalize content.", // Simplified text
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.black87,
                   )),
@@ -408,9 +351,11 @@ class GenderChooserState extends State<GenderChooser> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: SelectableOption(
-                    isSelected: state.gender == "male",
+                    isSelected: state.gender == "male", // Check state
                     onSelected: () {
-                      context.read<OnboardingCubit>().setGender("male");
+                      context
+                          .read<OnboardingCubit>()
+                          .setGender("male"); // Update state
                     },
                     child: Center(child: Text("Male")),
                   ),
@@ -418,9 +363,11 @@ class GenderChooserState extends State<GenderChooser> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: SelectableOption(
-                    isSelected: state.gender == "female",
+                    isSelected: state.gender == "female", // Check state
                     onSelected: () {
-                      context.read<OnboardingCubit>().setGender("female");
+                      context
+                          .read<OnboardingCubit>()
+                          .setGender("female"); // Update state
                     },
                     child: Center(child: Text("Female")),
                   ),
@@ -434,193 +381,30 @@ class GenderChooserState extends State<GenderChooser> {
   }
 }
 
-class TopicChooser extends StatefulWidget {
-  const TopicChooser({super.key});
-
-  @override
-  State<TopicChooser> createState() => TopicChooserState();
-}
-
-class TopicChooserState extends State<TopicChooser> {
-  Widget _buildOption(
-    String id, {
-    required String leading,
-    required String text,
-    required String subtext,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: SelectableOption(
-        isSelected: context.read<OnboardingCubit>().state.selectedTopic == id,
-        onSelected: () {
-          context.read<OnboardingCubit>().setSelectedTopic(id);
-        },
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              backgroundColor: Colors.grey.shade200,
-              child: Text(
-                leading,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-            SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  text,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 4),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.6,
-                  child: Text(
-                    subtext,
-                    softWrap: true,
-                    maxLines: 3,
-                    style: TextStyle(
-                      color: Colors.grey.shade500,
-                      fontSize: 12,
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final target = context.read<OnboardingCubit>().state.targetLanguage;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              backgroundColor: Color(0xff2D2C2D),
-              child: Icon(
-                Icons.check,
-                color: Colors.white,
-                size: 32,
-              ),
-            ),
-            SizedBox(height: 16),
-            Text("Congratulations\n your custom plan is ready",
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    )),
-            SizedBox(height: 8),
-            Text("You should Learn:",
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    )),
-            SizedBox(height: 4),
-            Chip(
-              label: Text(
-                "+1000 $target words by November 15",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold, color: Color(0xff2D2C2D)),
-              ),
-              backgroundColor: Colors.grey.shade200,
-              shape: StadiumBorder(),
-              side: BorderSide.none,
-            ),
-            SizedBox(height: 16),
-            Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Topic Recomendation",
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          )),
-                  Text(
-                    "You can edit this any time",
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.black87,
-                        ),
-                  ),
-                  SizedBox(height: 8),
-                  BlocBuilder<OnboardingCubit, OnboardingState>(
-                      builder: (context, state) {
-                    return Column(
-                      spacing: 12,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // ...state.filtredFlows
-                        //         ?.map((flow) => _buildOption(
-                        //               flow.id,
-                        //               leading: [
-                        //                 "A1",
-                        //                 "A2",
-                        //                 "B1",
-                        //                 "B2",
-                        //                 "C1",
-                        //                 "C2"
-                        //               ][flow.level],
-                        //               text: flow.id,
-                        //               subtext: flow.title,
-                        //             ))
-                        //         .toList() ??
-                        //     [],
-                      ],
-                    );
-                  }),
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class CommitmentQuestion extends StatefulWidget {
+class CommitmentQuestion extends StatelessWidget {
+  // Changed to StatelessWidget
   const CommitmentQuestion({super.key});
 
-  @override
-  State<CommitmentQuestion> createState() => CommitmentQuestionState();
-}
-
-class CommitmentQuestionState extends State<CommitmentQuestion> {
   Widget _buildOption(
+    BuildContext context, // Pass context
     int index, {
     required String leading,
     required String text,
     required String subtext,
   }) {
+    // Read state inside build or pass selected value
+    final selectedLevel = context.read<OnboardingCubit>().state.commitmentLevel;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: SelectableOption(
-        isSelected:
-            context.read<OnboardingCubit>().state.languageLevel == index,
+        isSelected: selectedLevel == index, // Check state
         onSelected: () {
-          context.read<OnboardingCubit>().setLanguageLevel(index);
+          context
+              .read<OnboardingCubit>()
+              .setCommitmentLevel(index); // Update state
         },
         child: Row(
+          // ... Row content ...
           mainAxisSize: MainAxisSize.min,
           children: [
             CircleAvatar(
@@ -666,51 +450,55 @@ class CommitmentQuestionState extends State<CommitmentQuestion> {
 
   @override
   Widget build(BuildContext context) {
-    final target = context.read<OnboardingCubit>().state.targetLanguage;
+    // final target = context.read<OnboardingCubit>().state.targetLanguage; // Removed
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("How You Rate Your new Habits Decipline?",
+          Text("How You Rate Your Habit Discipline?", // Adjusted title
               style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   )),
           SizedBox(height: 16),
           Text(
-              "what is your current Decipline with new habits, knowing this will help us to create a custom plan for you",
+              "What is your current discipline with new habits? Knowing this helps us create a custom plan.", // Adjusted subtitle
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.black87,
                   )),
           SizedBox(height: 20),
           Expanded(child: BlocBuilder<OnboardingCubit, OnboardingState>(
               builder: (context, state) {
+            // Use BlocBuilder to rebuild options on state change
             return SingleChildScrollView(
               child: Column(
-                spacing: 12,
+                // spacing: 12, // Use Padding instead
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildOption(
+                    context, // Pass context
                     1,
-                    leading: "F",
-                    text: "Never Started",
+                    leading: "F", // Example rating
+                    text: "Never Started / Struggle Early",
                     subtext:
-                        "I can say hello, goodbye and ask simple questions.",
+                        "Often find it hard to begin or stick past a few days.",
                   ),
                   _buildOption(
+                    context, // Pass context
                     2,
-                    leading: "C",
-                    text: "Can't finish one Week",
+                    leading: "C", // Example rating
+                    text: "Inconsistent / Short Streaks",
                     subtext:
-                        "I can talk about myself and my routine in basic sentences.",
+                        "Can maintain for a week or two, but fall off easily.",
                   ),
                   _buildOption(
+                    context, // Pass context
                     3,
-                    leading: "E",
-                    text: "Solid when i want the Habit",
+                    leading: "A", // Example rating
+                    text: "Fairly Consistent / Determined",
                     subtext:
-                        "I can handle common travel, work and social situations.",
+                        "Generally stick to it when committed, but seek improvement.",
                   ),
                 ],
               ),
@@ -722,17 +510,13 @@ class CommitmentQuestionState extends State<CommitmentQuestion> {
   }
 }
 
-class OtherAppsUsage extends StatefulWidget {
+class OtherAppsUsage extends StatelessWidget {
+  // Changed to StatelessWidget
   const OtherAppsUsage({super.key});
 
   @override
-  State<OtherAppsUsage> createState() => OtherAppsUsageState();
-}
-
-class OtherAppsUsageState extends State<OtherAppsUsage> {
-  @override
   Widget build(BuildContext context) {
-    final target = context.read<OnboardingCubit>().state.targetLanguage;
+    // final target = context.read<OnboardingCubit>().state.targetLanguage; // Removed
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
@@ -746,35 +530,50 @@ class OtherAppsUsageState extends State<OtherAppsUsage> {
           Expanded(child: BlocBuilder<OnboardingCubit, OnboardingState>(
               builder: (context, state) {
             return Column(
-              spacing: 12,
+              // spacing: 12, // Use Padding instead
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SelectableOption(
-                  isSelected: false,
-                  onSelected: () {},
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                          backgroundColor: Colors.white,
-                          child: Icon(
-                            Icons.thumb_down_off_alt_rounded,
-                            color: Colors.black,
-                          )),
-                      SizedBox(width: 16),
-                      Text(
-                        "No",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: SelectableOption(
+                    isSelected: state.usedOtherApps ==
+                        false, // Check state (explicitly false)
+                    onSelected: () {
+                      context
+                          .read<OnboardingCubit>()
+                          .setUsedOtherApps(false); // Update state
+                    },
+                    child: Row(
+                      children: [
+                        // ... Icon and Text ...
+                        CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Icon(
+                              Icons.thumb_down_off_alt_rounded,
+                              color: Colors.black,
+                            )),
+                        SizedBox(width: 16),
+                        Text(
+                          "No",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 SelectableOption(
-                  isSelected: false,
-                  onSelected: () {},
+                  isSelected: state.usedOtherApps ==
+                      true, // Check state (explicitly true)
+                  onSelected: () {
+                    context
+                        .read<OnboardingCubit>()
+                        .setUsedOtherApps(true); // Update state
+                  },
                   child: Row(
                     children: [
+                      // ... Icon and Text ...
                       CircleAvatar(
                           backgroundColor: Colors.white,
                           child: Icon(
@@ -823,72 +622,6 @@ class HabitVoteDifference extends StatelessWidget {
   }
 }
 
-class NativeLanguageChooser extends StatefulWidget {
-  const NativeLanguageChooser({super.key});
-
-  @override
-  State<NativeLanguageChooser> createState() => NativeLanguageChooserState();
-}
-
-class NativeLanguageChooserState extends State<NativeLanguageChooser> {
-  final List<String> _languages = [
-    'English',
-    'Spanish',
-    'French',
-    'German',
-    'Italian',
-    'Portuguese',
-    'Russian',
-    'Japanese',
-    'Turkish',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Choose Your Native Language",
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  )),
-          SizedBox(height: 16),
-          Text("the Language You master",
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.black87,
-                  )),
-          SizedBox(height: 20),
-          Expanded(
-            child: BlocBuilder<OnboardingCubit, OnboardingState>(
-                builder: (context, state) {
-              return ListView.builder(
-                itemCount: _languages.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: SelectableOption(
-                      isSelected: state.nativeLanguage == _languages[index],
-                      onSelected: () {
-                        context
-                            .read<OnboardingCubit>()
-                            .setNativeLanguage(_languages[index]);
-                      },
-                      child: Center(child: Text(_languages[index])),
-                    ),
-                  );
-                },
-              );
-            }),
-          )
-        ],
-      ),
-    );
-  }
-}
-
 // --- Add the new HabitChooser Widget ---
 
 class HabitChooser extends StatefulWidget {
@@ -902,10 +635,11 @@ class _HabitChooserState extends State<HabitChooser> {
   final TextEditingController _customHabitController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
-  String? _selectedPredefinedHabit;
+  // String? _selectedPredefinedHabit; // Removed, rely on cubit state
 
   // Example habit data structure: Map<CategoryName, List<MapEntry<IconData, HabitTitle>>>
-  final Map<String, List<MapEntry<IconData, String>>> _habitGroups = {
+  final Map<String, List<MapEntry<IconData, String>>> _habitGroups = const {
+    // Made const
     'Health & Fitness': [
       MapEntry(Icons.fitness_center, 'Exercise Regularly'),
       MapEntry(Icons.water_drop, 'Drink More Water'),
@@ -930,19 +664,18 @@ class _HabitChooserState extends State<HabitChooser> {
       MapEntry(Icons.music_note, 'Practice Instrument'),
       MapEntry(Icons.school, 'Study Subject'),
     ],
+    // Add more categories/habits as needed
   };
 
   @override
   void initState() {
     super.initState();
-    // Update cubit if initial value exists
-    final initialHabit = null;
-    if (initialHabit != null && initialHabit.isNotEmpty) {
-      // Check if it's a predefined habit
-      bool isPredefined = false;
+    // Initialize text field if cubit has a custom habit value
+    final initialHabit = context.read<OnboardingCubit>().state.selectedHabit;
+    bool isPredefined = false;
+    if (initialHabit != null) {
       for (var group in _habitGroups.values) {
         if (group.any((entry) => entry.value == initialHabit)) {
-          _selectedPredefinedHabit = initialHabit;
           isPredefined = true;
           break;
         }
@@ -954,18 +687,22 @@ class _HabitChooserState extends State<HabitChooser> {
 
     _customHabitController.addListener(() {
       final text = _customHabitController.text;
+      // Update cubit only if text is not empty and differs from current state
+      // Or if text becomes empty
+      final currentHabit = context.read<OnboardingCubit>().state.selectedHabit;
       if (text.isNotEmpty) {
-        // If user types, deselect predefined and update cubit with text
-        if (_selectedPredefinedHabit != null) {
-          setState(() {
-            _selectedPredefinedHabit = null;
-          });
+        // If user types, update cubit with text
+        // This implicitly deselects any predefined habit in the cubit state
+        if (currentHabit != text) {
+          context.read<OnboardingCubit>().setSelectedHabit(text);
         }
-        // context.read<OnboardingCubit>().setHabit(text);
       } else {
-        // If text is cleared, update cubit (might set to null or empty based on cubit logic)
-        //  context.read<OnboardingCubit>().setHabit(null); // Or ""
+        // If text is cleared, update cubit to null only if it wasn't already null
+        if (currentHabit != null) {
+          context.read<OnboardingCubit>().setSelectedHabit(null);
+        }
       }
+      // No need for setState here unless UI depends directly on _selectedPredefinedHabit
     });
   }
 
@@ -978,17 +715,21 @@ class _HabitChooserState extends State<HabitChooser> {
   }
 
   void _scrollToTopAndFocus() {
+    // Clear predefined selection when focusing text field
+    // context.read<OnboardingCubit>().setSelectedHabit(_customHabitController.text.isNotEmpty ? _customHabitController.text : null);
     _scrollController.animateTo(
       0,
       duration: Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
     _focusNode.requestFocus();
+    // Ensure text field content updates cubit state via listener
   }
 
   Widget _buildHabitGroup(
       String title, List<MapEntry<IconData, String>> habits) {
-    final selectedHabit = "";
+    // Read selected habit from cubit state within BlocBuilder or context.watch
+    final selectedHabit = context.watch<OnboardingCubit>().state.selectedHabit;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1013,18 +754,16 @@ class _HabitChooserState extends State<HabitChooser> {
 
             return SizedBox(
               width: (MediaQuery.of(context).size.width / 2) -
-                  20 -
-                  5, // Adjust width for 2 columns + spacing
+                  20 - // Padding
+                  5, // Spacing / 2
               child: SelectableOption(
                 isSelected: isSelected,
                 onSelected: () {
-                  setState(() {
-                    _selectedPredefinedHabit = habitTitle;
-                    _customHabitController
-                        .clear(); // Clear text field if predefined is chosen
-                  });
-                  // context.read<OnboardingCubit>().setHabit(habitTitle);
+                  // Update cubit state with the selected predefined habit
+                  context.read<OnboardingCubit>().setSelectedHabit(habitTitle);
+                  _customHabitController.clear(); // Clear text field
                   FocusScope.of(context).unfocus(); // Hide keyboard
+                  // No need for setState if UI relies on BlocBuilder/watch
                 },
                 child: Row(
                   children: [
@@ -1033,13 +772,13 @@ class _HabitChooserState extends State<HabitChooser> {
                         color: isSelected ? Colors.white : Colors.black87),
                     SizedBox(width: 8),
                     Expanded(
-                      child: FittedBox(
-                        child: Text(
-                          habitTitle,
-                          style: TextStyle(
-                              fontWeight: FontWeight.w500, fontSize: 13),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                      // Use Flexible + Text instead of FittedBox for better control
+                      child: Text(
+                        habitTitle,
+                        style: TextStyle(
+                            fontWeight: FontWeight.w500, fontSize: 13),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1, // Ensure single line
                       ),
                     ),
                   ],
@@ -1054,7 +793,7 @@ class _HabitChooserState extends State<HabitChooser> {
 
   @override
   Widget build(BuildContext context) {
-    // Re-read state here if needed, or rely on BlocBuilder/watch
+    // Use BlocBuilder or context.watch for reactive UI updates
     // final selectedHabit = context.watch<OnboardingCubit>().state.selectedHabit;
 
     return Padding(
@@ -1062,6 +801,7 @@ class _HabitChooserState extends State<HabitChooser> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ... Title and Subtitle ...
           Text("Choose or Define Your Habit",
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
@@ -1090,25 +830,27 @@ class _HabitChooserState extends State<HabitChooser> {
                   EdgeInsets.symmetric(vertical: 14, horizontal: 16),
             ),
             onTap: () {
-              // When user taps text field, deselect predefined habit visually
-              if (_selectedPredefinedHabit != null) {
-                setState(() {
-                  _selectedPredefinedHabit = null;
-                });
-                // Optionally clear cubit state immediately or wait for text input listener
-                // context.read<OnboardingCubit>().setHabit(null);
-              }
+              // Tapping text field implicitly deselects predefined via listener logic
+              // if (_customHabitController.text.isEmpty && context.read<OnboardingCubit>().state.selectedHabit != null) {
+              //    // If text field is empty but a predefined habit was selected, clear the cubit state
+              //    context.read<OnboardingCubit>().setSelectedHabit(null);
+              // }
             },
             // onChanged handled by listener in initState
           ),
           SizedBox(height: 20),
           Expanded(
-            child: ListView(
-              controller: _scrollController,
-              children: _habitGroups.entries
-                  .map((entry) => _buildHabitGroup(entry.key, entry.value))
-                  .toList(),
-            ),
+            // Use BlocBuilder here to rebuild habit groups when state changes
+            child: BlocBuilder<OnboardingCubit, OnboardingState>(
+                builder: (context, state) {
+              // Rebuild the list view when selectedHabit changes
+              return ListView(
+                controller: _scrollController,
+                children: _habitGroups.entries
+                    .map((entry) => _buildHabitGroup(entry.key, entry.value))
+                    .toList(),
+              );
+            }),
           ),
           SizedBox(height: 10),
           Center(
@@ -1117,7 +859,8 @@ class _HabitChooserState extends State<HabitChooser> {
               label: Text("Write New Habit"),
               onPressed: _scrollToTopAndFocus,
               style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).primaryColor,
+                foregroundColor:
+                    Theme.of(context).primaryColor, // Use theme color
               ),
             ),
           ),
@@ -1187,7 +930,11 @@ class ThankYouSlide extends StatelessWidget {
 }
 
 class SetupProgressSlide extends StatefulWidget {
-  const SetupProgressSlide({super.key});
+  final VoidCallback onComplete; // Optional callback for completion
+  const SetupProgressSlide({
+    super.key,
+    required this.onComplete,
+  });
 
   @override
   State<SetupProgressSlide> createState() => _SetupProgressSlideState();
@@ -1227,7 +974,7 @@ class _SetupProgressSlideState extends State<SetupProgressSlide> {
     _navigationTimer = Timer(const Duration(seconds: 5), () {
       if (mounted) {
         // Navigate to the main app screen, replace '/home' with your actual route
-        context.go('/home'); // Use goRouter's go method to replace the stack
+        widget.onComplete();
       }
     });
   }

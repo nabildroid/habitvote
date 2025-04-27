@@ -36,7 +36,7 @@ Future<Database> setUpStorage() async {
   final dir = await getApplicationDocumentsDirectory();
   await dir.create(recursive: true);
 
-  PreferenceExtension.globalPrefix = "10";
+  PreferenceExtension.globalPrefix = "20";
   final db = await databaseFactoryIo.openDatabase(
     join(dir.path, 'habitVote_v${PreferenceExtension.globalPrefix}.db'),
   );

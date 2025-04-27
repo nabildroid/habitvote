@@ -4,9 +4,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:habitvote/features/vote/presentation/widgets/today_voters.dart';
 
-import '../../tracker/presentations/widgets/checkin_slider.dart';
+import '../../habit/presentations/widgets/checkin_slider.dart';
 import 'widgets/custom_app_bar.dart';
-import '../../tracker/presentations/widgets/habit_heatmap.dart';
+import '../../habit/presentations/widgets/habit_heatmap.dart';
 import '../../vote/presentation/widgets/social_overview.dart';
 
 class HomeScreen extends StatefulWidget {

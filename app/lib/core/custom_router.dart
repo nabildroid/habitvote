@@ -4,8 +4,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:habitvote/core/locator.dart';
 import 'package:habitvote/features/onboarding/presentration/screens/ads_screen.dart';
 import 'package:habitvote/features/onboarding/presentration/screens/onboarding_screen.dart';
+import 'package:habitvote/features/user/application/cubits/auth_cubit.dart';
+import 'package:habitvote/features/user/data/auth_service.dart';
+import 'package:habitvote/features/user/utils/user_checker.dart';
+import 'package:rxdart/transformers.dart';
 
 // import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -13,12 +18,24 @@ import 'package:habitvote/features/home/presentation/home_screen.dart';
 
 final GoRouter router = GoRouter(
   observers: [
-    // locator.get<RouteObserver<ModalRoute<dynamic>>>(),
+    locator.get<RouteObserver<ModalRoute<dynamic>>>(),
     // SentryNavigatorObserver(),
     // if (Platform.isAndroid) PosthogObserver(),
   ],
   redirect: (BuildContext context, GoRouterState state) async {
-    return null;
+    final isReady = await isUserLoggedIn();
+
+    if (state.fullPath == null) return null;
+
+    if (isReady) {
+      if (state.fullPath!.startsWith("/home") ||
+          state.fullPath!.startsWith("/favorites")) return null;
+      return "/home";
+    } else {
+      if (state.fullPath!.startsWith("/register") ||
+          state.fullPath!.startsWith("/onboarding")) return null;
+      return "/onboarding";
+    }
   },
   initialLocation: "/onboarding",
   routes: [

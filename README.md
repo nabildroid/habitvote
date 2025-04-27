@@ -9,7 +9,10 @@
 - [X] Make the habit tracker works
 ------------------------
 - [X] google Auth
-- [ ] Add Onboarding Screens
+- [X] Add Onboarding Screens
+------------------------
+- [ ] Save Habit
+- [ ] Save Records
 ------------------------
 - [ ] Ability to vote for people to activate todays votes (make the votes visible)
 - [ ] Generate Random Bot Votes to everyone

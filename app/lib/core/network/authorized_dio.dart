@@ -6,7 +6,7 @@ import 'package:habitvote/core/constant.dart';
 
 abstract class AuthorizedDio {
   static final defaultHttp = Dio(BaseOptions(
-    baseUrl: AUTH_ENDPOINT,
+    baseUrl: "http://192.168.0.105:3000",
   ));
 
   final Dio rawHttp;

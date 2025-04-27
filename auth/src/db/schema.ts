@@ -8,7 +8,6 @@ export const usersTable = sqliteTable("users", {
     photoUrl: text(),
     createdAt: integer({ mode: 'timestamp_ms' }).default(sql`(CURRENT_TIMESTAMP)`),
     email: text().notNull().unique(),
-    nativeLanguage: text().default("English").notNull(),
     claims: text({ mode: 'json' }).$type<{
         premiumExpires?: number,
     }>()
