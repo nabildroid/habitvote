@@ -20,4 +20,11 @@ class HabitRemote extends AuthorizedDio {
     final List<dynamic> data = response.data;
     return data.map((e) => HabitModel.fromJson(e)).toList();
   }
+
+  Future<List<HabitModel>> getCandidateHabits(String canditateId) async {
+    final repsonse = await (await http).get("/habits/candidate/$canditateId");
+
+    final List<dynamic> data = repsonse.data;
+    return data.map((e) => HabitModel.fromJson(e)).toList();
+  }
 }

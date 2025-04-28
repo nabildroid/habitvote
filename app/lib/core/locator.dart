@@ -6,6 +6,7 @@ import 'package:habitvote/features/habit/data/sources/tracker_cache.dart';
 import 'package:habitvote/features/habit/data/sources/tracker_remote.dart';
 import 'package:habitvote/features/vote/data/repositories/votes_repository.dart';
 import 'package:habitvote/features/vote/data/sources/votes_cache.dart';
+import 'package:habitvote/features/vote/data/sources/votes_remote.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
 import 'package:habitvote/features/habit/data/repositories/habit_repository.dart';
@@ -26,7 +27,8 @@ Future<void> setUpLocator({required Database sembastInstance}) async {
   locator.registerFactory(
       () => TrackerRepo(cache: TrackerCache(), remote: TrackerRemote()));
 
-  locator.registerFactory(() => VotesRepo(cache: VotesCache()));
+  locator.registerFactory(
+      () => VotesRepo(cache: VotesCache(), remote: VotesRemote()));
 
   locator.registerSingleton(AuthService()..fetch());
 

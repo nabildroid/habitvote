@@ -17,10 +17,14 @@ class HabitVoteApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (ctx) => HabitTrackerCubit()..init(), lazy: false),
-        BlocProvider(create: (ctx) => VotesCubit()..init(), lazy: false),
-        BlocProvider(create: (ctx) => OnboardingCubit()),
         BlocProvider(create: (ctx) => AuthCubit()..init(), lazy: false),
+        BlocProvider(create: (ctx) => OnboardingCubit()),
+        BlocProvider(create: (ctx) => HabitTrackerCubit()..init(), lazy: false),
+        BlocProvider(
+            create: (ctx) => VotesCubit()
+              ..init()
+              ..syncWithHabit(ctx),
+            lazy: false),
       ],
       child: MaterialApp.router(
         localizationsDelegates: [

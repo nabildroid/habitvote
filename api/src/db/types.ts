@@ -16,6 +16,8 @@ export const HabitSchema = z.object({
     isDeleted: z.boolean().optional(),
 })
 
+export type IHabit = z.infer<typeof HabitSchema>;
+
 export const NewHabitSchema = HabitSchema.omit({
     isDeleted: true
 });

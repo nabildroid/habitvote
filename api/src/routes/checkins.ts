@@ -53,7 +53,47 @@ CheckinRoute.get("/", async (c) => {
     const uid = c.var.jwtPayload.uid;
     const checkins = await Firebase.firestore().collection("users").doc(uid).collection("checkin").get();
 
-    const data = checkins.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as ICheckin[];
+    const data = checkins.docs.map((doc) => {
+        const checkin = doc.data();
+        return {
+            id: doc.id,
+            ...checkin,
+            date: checkin.date.toDate(),
+            createdAt: checkin.createdAt.toDate(),
+        };
+
+    }) as ICheckin[];
+
+    return c.json(data);
+});
+
+CheckinRoute.get("/candidate/:candidateId/:habitId", async (c) => {
+    const habitId = c.req.param("habitId");
+    const candidateId = c.req.param("candidateId");
+
+    if (!candidateId) {
+        return c.json({ error: "Candidate ID is required" }, { status: 400 });
+    }
+
+    const checkins = await Firebase.firestore().collection("users").doc(candidateId).collection("checkin").where("habitId", "==", habitId).get();
+    let data = checkins.docs.map((doc) => {
+        const checkin = doc.data();
+        return {
+            id: doc.id,
+            ...checkin,
+            date: checkin.date.toDate(),
+            createdAt: checkin.createdAt.toDate(),
+        };
+
+    }) as ICheckin[];
+
+    // Sort by date (newest first)
+    data = data.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+    // Limit to the last 10 checkins
+    data = data.slice(0, 10);
+
+
 
     return c.json(data);
 });

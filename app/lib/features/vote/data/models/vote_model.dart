@@ -26,9 +26,9 @@ class VoteModel {
       id: json['id'],
       openDate: DateTime.parse(json['openDate']),
       endDate: DateTime.parse(json['endDate']),
-      up: json['up'],
-      down: json['down'],
-      isActivated: json['isActivated'],
+      up: json['up'] ?? 0,
+      down: json['down'] ?? 0,
+      isActivated: json['isActivated'] ?? false,
       habitId: json['habitId'],
       lastUpdate: DateTime.parse(json['lastUpdate']),
     );

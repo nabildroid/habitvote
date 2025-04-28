@@ -28,4 +28,14 @@ class TrackerRemote extends AuthorizedDio {
         .where((e) => e.habitId == habitId)
         .toList();
   }
+
+  Future<List<CheckinModel>> getCandidateCheckins({
+    required String canditateId,
+    required String habitId,
+  }) async {
+    final repsonse =
+        await (await http).get("/checkin//candidate/$canditateId/$habitId");
+    final List<dynamic> data = repsonse.data;
+    return data.map((e) => CheckinModel.fromJson(e)).toList();
+  }
 }

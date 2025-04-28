@@ -140,7 +140,7 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
             ImageFiltered(
               imageFilter: ImageFilter.blur(
                 sigmaX: 3,
-                sigmaY: 1.2,
+                sigmaY: 2,
               ),
               child: Text(
                 count
@@ -189,8 +189,10 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
                   positiveColor:
                       Theme.of(context).primaryColorLight, // Use theme color
                   negativeColor: Colors.red.shade700, // Use red for negative
-                  positiveCount: 23, // total positives
-                  negativeCount: 7, // total negatives
+                  positiveCount:
+                      context.voteState.today?.up ?? 23, // total positives
+                  negativeCount:
+                      context.voteState.today?.down ?? 7, // total negatives
                 ),
                 size: const Size(120, 120),
               );
