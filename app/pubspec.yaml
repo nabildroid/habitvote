@@ -23,7 +23,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # flutter_local_notifications:
+  flutter_local_notifications:
   wakelock_plus: ^1.2.5 # screen always on for 5 min when Scanning screen, reseted on each scan
   shared_preferences: ^2.2.3
   rxdart: ^0.27.7 # notification handler
@@ -61,9 +61,11 @@ dependencies:
   intrinsic_dimension:
   jwt_decoder:
   firebase_core:
+  firebase_messaging:
+  firebase_app_check:
+  cloud_firestore:
   in_app_purchase:
   google_sign_in:
-  firebase_app_check:
   pinput:
   flutter_inappwebview:
   permission_handler:
@@ -71,7 +73,6 @@ dependencies:
   sliver_tools:
   action_slider:
   flutter_keyboard_visibility:
-  cloud_firestore:
   sentry_flutter:
   # audioplayers:
   flutter_native_splash:

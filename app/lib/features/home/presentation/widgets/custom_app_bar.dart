@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitvote/shared/activate_notification_dialog.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
@@ -38,7 +39,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         IconButton(
           icon: const Icon(Icons.settings),
-          onPressed: () {},
+          onPressed: () {
+            showActivateNotificationDialog(context);
+          },
         ),
         const SizedBox(width: 8),
       ],

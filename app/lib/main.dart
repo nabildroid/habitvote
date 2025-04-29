@@ -5,6 +5,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:habitvote/core/network/connectivity.dart';
+import 'package:habitvote/services/firebase_service.dart';
+import 'package:habitvote/services/notification_service.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:path/path.dart';
@@ -31,6 +33,7 @@ void main() async {
   await initializeDateFormatting(Platform.localeName);
   tz.initializeTimeZones();
 
+  await initNotification();
   runApp(const HabitVoteApp());
 }
 
@@ -88,4 +91,11 @@ Future<void> setUpSplashScreen(WidgetsBinding widgetsBinding) async {
       FlutterNativeSplash.remove();
     });
   }
+}
+
+Future<void> initNotification() async {
+  final firebaseService = locator<FirebaseService>();
+  await firebaseService.init();
+  final notificationService = locator<NotificationService>();
+  await notificationService.init();
 }
