@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
+import 'package:habitvote/features/onboarding/presentration/widgets/brilliant_ok_button.dart';
 import 'dart:ui';
 
 import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
@@ -104,14 +105,9 @@ class _VoteSummaryBottomSheetState extends State<VoteSummaryBottomSheet> {
           // const SizedBox(height: 24),
 
           // Action Button (Placeholder - replace with Swipe Button later if needed)
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-            ),
+
+          BrilliantOkButton(
+            text: _ctas.first,
             onPressed: () {
               Navigator.of(context).pop(); // Close the bottom sheet
               showModalBottomSheet(
@@ -123,8 +119,20 @@ class _VoteSummaryBottomSheetState extends State<VoteSummaryBottomSheet> {
                 builder: (context) => CandidatsVotingBottomSheet(),
               );
             },
+          ),
+
+          SizedBox(height: 16),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30.0),
+              ),
+            ),
+            onPressed: () {},
             child: Text(
-              _ctas.first, // Random CTA from the list
+              "show me without voting", // Random CTA from the list
               style: TextStyle(fontSize: 16, color: Colors.black),
             ),
           ),
