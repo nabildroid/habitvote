@@ -1,7 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'dart:ui'; // Required for ImageFilter.blur
+import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
+import 'dart:ui';
+
+import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
+import 'package:habitvote/features/vote/presentation/widgets/candidats_voting_bottom_sheet.dart'; // Required for ImageFilter.blur
 
 final _ctas = [
   "Vote to Reveal Your Votes",
@@ -17,17 +21,28 @@ final _ctas = [
 ];
 final _r = Random(DateTime.now().millisecondsSinceEpoch ~/ 1000);
 
-class VoteSummaryBottomSheet extends StatelessWidget {
+class VoteSummaryBottomSheet extends StatefulWidget {
   VoteSummaryBottomSheet({super.key});
+  @override
+  State<VoteSummaryBottomSheet> createState() => _VoteSummaryBottomSheetState();
+}
+
+class _VoteSummaryBottomSheetState extends State<VoteSummaryBottomSheet> {
+  @override
+  void initState() {
+    _ctas.shuffle(_r);
+    super.initState();
+
+    context.voteCubit.fetchCandidats();
+  }
 
   @override
   Widget build(BuildContext context) {
-    _ctas.shuffle(_r);
     // Placeholder data
-    const int todayUpVotes = 15;
-    const int yesterdayUpVotes = 12;
-    const int todayDownVotes = 3;
-    const int yesterdayDownVotes = 5;
+    final int todayUpVotes = context.voteState.today?.up ?? 0;
+    final int yesterdayUpVotes = context.voteState.yesterday?.up ?? 0;
+    final int todayDownVotes = context.voteState.today?.down ?? 0;
+    final int yesterdayDownVotes = context.voteState.yesterday?.down ?? 0;
 
     return Container(
       // Add padding for the content to not touch the edges
@@ -98,7 +113,15 @@ class VoteSummaryBottomSheet extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              Navigator.pop(context); // Close the bottom sheet
+              Navigator.of(context).pop(); // Close the bottom sheet
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled:
+                    true, // Allows the sheet to take up more height if needed
+                backgroundColor: Colors
+                    .transparent, // Make background transparent for custom shape
+                builder: (context) => CandidatsVotingBottomSheet(),
+              );
             },
             child: Text(
               _ctas.first, // Random CTA from the list
@@ -148,7 +171,7 @@ class VoteSummaryBottomSheet extends StatelessWidget {
               ClipRect(
                 // Clip the blur effect
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
+                  filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
                   child: Container(
                     // This container needs to have the same size as the text to cover it
                     // We make it transparent so only the blur effect is visible
@@ -169,18 +192,4 @@ class VoteSummaryBottomSheet extends StatelessWidget {
       ),
     );
   }
-
-  // Optional helper for detail rows
-  // Widget _buildDetailRow(String label, String value) {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-  //     child: Row(
-  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //       children: [
-  //         Text(label, style: TextStyle(color: Colors.grey[600])),
-  //         Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
-  //       ],
-  //     ),
-  //   );
-  // }
 }

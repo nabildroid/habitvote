@@ -35,6 +35,32 @@ VotesRoute.post("attend", async (c) => {
 });
 
 
+VotesRoute.post("/:voteId/activate", async (c) => {
+
+    if (!c.var.jwtPayload.uid) return c.json({ error: "Unauthorized" }, { status: 401 });
+    const uid = c.var.jwtPayload.uid;
+    const voteId = c.req.param("voteId");
+
+    if (!voteId) return c.json({ error: "Vote ID is required" }, { status: 400 });
+
+    const voteRef = Firebase.firestore().collection("users").doc(uid).collection("votes").doc(voteId);
+
+    try {
+        await voteRef.update({
+            isActivated: true,
+            lastUpdate: new Date()
+        });
+        
+        return c.json({ success: true });
+    } catch (error) {
+        console.error("Error activating vote:", error);
+        return c.json({ error: "Failed to activate vote" }, { status: 500 });
+    }
+
+});
+
+
+
 
 VotesRoute.get("/", async (c) => {
     if (!c.var.jwtPayload.uid) return c.json({ error: "Unauthorized" }, { status: 401 });
@@ -122,7 +148,7 @@ VotesRoute.post("/on/:candidatId/:habitId", async (c) => {
     return c.json({ success: true });
 });
 
-VotesRoute.get("bot", async (c) => {
+VotesRoute.get("/on/bot", async (c) => {
     // if (!c.var.jwtPayload.admin) return c.json({ error: "Unauthorized" }, { status: 401 });
 
     const available = await getCandidates();

@@ -31,4 +31,23 @@ class VotesRemote extends AuthorizedDio {
 
     return data;
   }
+
+  Future<void> voteOn({
+    required String candidatId,
+    required String habitId,
+    required bool positive,
+  }) async {
+    final response = await (await http).post(
+      "/votes/on/$candidatId/$habitId",
+      data: {
+        "decision": positive ? "up" : "down",
+      },
+    );
+  }
+
+  Future<void> activate(String voteId) async {
+    final response = await (await http).post(
+      "/votes/$voteId/activate",
+    );
+  }
 }

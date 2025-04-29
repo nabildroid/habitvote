@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
+import 'package:habitvote/features/vote/presentation/widgets/vote_summary_bottom_sheet.dart';
 
 class TodayVotersWidget extends StatefulWidget {
   // add empty-state toggle
@@ -137,21 +138,35 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
 
           // Blurred count
           if (!showDescription)
-            ImageFiltered(
-              imageFilter: ImageFilter.blur(
-                sigmaX: 3,
-                sigmaY: 2,
-              ),
-              child: Text(
-                count
-                    .toString()
-                    .padLeft(2, '8'), // Pad with '8' for blur effect
-                style: TextStyle(
-                  color: Colors.white, // Darker grey for blurred effect
-                  fontSize: 16, // Slightly larger font for blurred number
-                  fontWeight: FontWeight.bold,
+            GestureDetector(
+              onTap: () {
+                if (context.voteState.today?.isActivated == true) return;
+
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled:
+                      true, // Allows the sheet to take up more height if needed
+                  backgroundColor: Colors
+                      .transparent, // Make background transparent for custom shape
+                  builder: (context) => VoteSummaryBottomSheet(),
+                );
+              },
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(
+                  sigmaX: 3,
+                  sigmaY: 2,
                 ),
-                textAlign: TextAlign.center,
+                child: Text(
+                  count
+                      .toString()
+                      .padLeft(2, '8'), // Pad with '8' for blur effect
+                  style: TextStyle(
+                    color: Colors.white, // Darker grey for blurred effect
+                    fontSize: 16, // Slightly larger font for blurred number
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
         ],

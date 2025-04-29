@@ -1,58 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:math';
-import 'dart:ui' as ui; // For Path dash effects
+import 'dart:ui' as ui;
 
-// --- Dummy Data ---
-class HabitPageData {
-  final String flag;
-  final String title;
-  final String duration;
-  final List<DateTime> completedDates;
-  final int totalDays; // Total days represented in the grid
+import 'package:habitvote/features/vote/data/models/candidat_model.dart';
+import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart'; // For Path dash effects
 
-  HabitPageData({
-    required this.flag,
-    required this.title,
-    required this.duration,
-    required this.completedDates,
-    this.totalDays = 35, // Example: 5 rows of 7 days
-  });
-}
-
-final List<HabitPageData> dummyHabitData = [
-  HabitPageData(
-    flag: '🇷🇴',
-    title: 'I want to Meditate',
-    duration: '30 min a day',
-    completedDates: List.generate(
-        18, (index) => DateTime.now().subtract(Duration(days: index * 2))),
-  ),
-  HabitPageData(
-    flag: '🇬🇧',
-    title: 'Read a Book',
-    duration: '1 chapter a day',
-    completedDates: List.generate(
-        25, (index) => DateTime.now().subtract(Duration(days: index))),
-  ),
-  HabitPageData(
-    flag: '🇩🇪',
-    title: 'Morning Run',
-    duration: '5 km a day',
-    completedDates: List.generate(
-        10, (index) => DateTime.now().subtract(Duration(days: index * 3 + 1))),
-  ),
-];
-// --- End Dummy Data ---
-
-class HabitProgressBottomSheet extends StatefulWidget {
-  const HabitProgressBottomSheet({super.key});
+class CandidatsVotingBottomSheet extends StatefulWidget {
+  const CandidatsVotingBottomSheet({super.key});
 
   @override
-  State<HabitProgressBottomSheet> createState() =>
-      _HabitProgressBottomSheetState();
+  State<CandidatsVotingBottomSheet> createState() =>
+      _CandidatsVotingBottomSheetState();
 }
 
-class _HabitProgressBottomSheetState extends State<HabitProgressBottomSheet> {
+class _CandidatsVotingBottomSheetState
+    extends State<CandidatsVotingBottomSheet> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -74,20 +37,14 @@ class _HabitProgressBottomSheetState extends State<HabitProgressBottomSheet> {
     super.dispose();
   }
 
-  void _nextPage() {
-    if (_currentPage < dummyHabitData.length - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    } else {
-      // Optional: Handle reaching the end (e.g., close sheet, loop back)
-      Navigator.pop(context); // Example: Close sheet
-    }
+  finish() {
+    context.voteCubit.activateTodayVotes();
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    final candidats = context.watchVoteState.todayCandidats;
     return Container(
       padding: const EdgeInsets.only(top: 12.0, bottom: 20.0),
       decoration: const BoxDecoration(
@@ -110,24 +67,53 @@ class _HabitProgressBottomSheetState extends State<HabitProgressBottomSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            // Constrain the height of the PageView area
-            // Adjust height as needed based on content
-            height: MediaQuery.of(context).size.height * 0.5,
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: dummyHabitData.length,
-              itemBuilder: (context, index) {
-                return HabitProgressPage(
-                  data: dummyHabitData[index],
-                  currentPage: index + 1,
-                  totalPages: dummyHabitData.length,
-                  onWin: _nextPage,
-                  onLose: _nextPage,
-                );
-              },
+
+          if (candidats.isEmpty)
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.3,
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                ),
+              ),
+            )
+          else
+            SizedBox(
+              // Constrain the height of the PageView area
+              // Adjust height as needed based on content
+              height: MediaQuery.of(context).size.height * 0.5,
+              child: PageView(
+                controller: _pageController,
+                children: candidats.map((candidat) {
+                  return HabitProgressPage(
+                    data: candidat,
+                    currentPage: _currentPage + 1,
+                    totalPages: candidats.length,
+                    onWin: () {
+                      context.voteCubit.voteOn(candidat, true);
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeIn,
+                      );
+                      if (_currentPage == candidats.length - 1) {
+                        finish();
+                      }
+                    },
+                    onLose: () {
+                      context.voteCubit.voteOn(candidat, false);
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeIn,
+                      );
+
+                      if (_currentPage == candidats.length - 1) {
+                        finish();
+                      }
+                    },
+                  );
+                }).toList(),
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -136,7 +122,7 @@ class _HabitProgressBottomSheetState extends State<HabitProgressBottomSheet> {
 
 // --- Page Content Widget ---
 class HabitProgressPage extends StatelessWidget {
-  final HabitPageData data;
+  final CandidatModel data;
   final int currentPage;
   final int totalPages;
   final VoidCallback onWin;
@@ -153,24 +139,6 @@ class HabitProgressPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Find the index of the most recent completed date for highlighting
-    // This is a simplified logic, assuming dates are roughly sequential
-    int highlightIndex = -1;
-    if (data.completedDates.isNotEmpty) {
-      // Assuming grid fills from top-left (index 0) to bottom-right
-      // Find the smallest difference in days from 'now'
-      int minDaysAgo = data.completedDates
-          .map((d) => DateTime.now().difference(d).inDays)
-          .where((days) => days >= 0) // Only consider past/present dates
-          .fold(data.totalDays + 1, min); // Find minimum days ago
-
-      // The index corresponds to how many days ago the last completion was
-      // This needs refinement based on actual grid layout logic
-      highlightIndex = minDaysAgo;
-      if (highlightIndex >= data.totalDays)
-        highlightIndex = -1; // Don't highlight if too old
-    }
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
@@ -180,21 +148,21 @@ class HabitProgressPage extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(data.flag, style: const TextStyle(fontSize: 24)), // Flag
+              Text("1", style: const TextStyle(fontSize: 24)), // Flag
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      data.title,
+                      data.habit.name,
                       style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      data.duration,
+                      data.habit.description,
                       style: TextStyle(color: Colors.grey[400], fontSize: 14),
                     ),
                   ],
@@ -214,10 +182,10 @@ class HabitProgressPage extends StatelessWidget {
           LayoutBuilder(builder: (context, constraints) {
             // Calculate grid dimensions
             final gridPainter = HabitGridPainter(
-              completedIndices:
-                  _getCompletedIndices(data.completedDates, data.totalDays),
-              totalSquares: data.totalDays,
-              highlightIndex: highlightIndex,
+              completedIndices: _getCompletedIndices(
+                  data.checkins.map((e) => e.date).toList(), 30),
+              totalSquares: 30,
+              highlightIndex: 10,
               gridColumns: 7,
             );
 

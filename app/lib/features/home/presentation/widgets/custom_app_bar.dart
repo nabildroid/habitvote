@@ -1,11 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:habitvote/core/locator.dart';
-import 'package:habitvote/features/habit/data/repositories/habit_repository.dart';
-import 'package:habitvote/features/habit/data/repositories/tracker_repository.dart';
-import 'package:habitvote/features/vote/presentation/widgets/habit_progress_bottom_sheet.dart';
-// Import the new bottom sheet widget
-import 'package:habitvote/features/vote/presentation/widgets/vote_summary_bottom_sheet.dart';
-import 'package:habitvote/features/vote/data/repositories/votes_repository.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
@@ -45,17 +38,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         IconButton(
           icon: const Icon(Icons.settings),
-          onPressed: () {
-            // Show the bottom sheet
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled:
-                  true, // Allows the sheet to take up more height if needed
-              backgroundColor: Colors
-                  .transparent, // Make background transparent for custom shape
-              builder: (context) => HabitProgressBottomSheet(),
-            );
-          },
+          onPressed: () {},
         ),
         const SizedBox(width: 8),
       ],

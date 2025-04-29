@@ -27,6 +27,11 @@ class VotesState extends Equatable {
     return votes.firstOrNull;
   }
 
+  VoteModel? get yesterday {
+    // return votes.where((vote) => vote.openDate == DateTime.now()).firstOrNull;
+    return votes.firstOrNull;
+  }
+
   factory VotesState.initial() {
     return VotesState(
       votes: [],
@@ -106,6 +111,23 @@ class VotesCubit extends Cubit<VotesState> {
     emit(state.copyWith(
       todayCandidats: candidatModels,
     ));
+  }
+
+  voteOn(CandidatModel candidat, bool positive) async {
+    await repo.remote.voteOn(
+      candidatId: candidat.id,
+      habitId: candidat.habit.id,
+      positive: positive,
+    );
+  }
+
+  activateTodayVotes() async {
+    print("activing todays vote");
+
+    final vote = state.today;
+    if (vote != null) {
+      await repo.remote.activate(vote.id);
+    }
   }
 }
 
