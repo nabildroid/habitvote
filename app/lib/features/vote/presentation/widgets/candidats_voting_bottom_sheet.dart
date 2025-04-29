@@ -183,8 +183,12 @@ class HabitProgressPage extends StatelessWidget {
             // Calculate grid dimensions
             final gridPainter = HabitGridPainter(
               completedIndices: _getCompletedIndices(
-                  data.checkins.map((e) => e.date).toList(), 30),
-              totalSquares: 30,
+                  data.checkins
+                      .where((e) => e.isDone)
+                      .map((e) => e.date)
+                      .toList(),
+                  35),
+              totalSquares: 35,
               highlightIndex: 10,
               gridColumns: 7,
             );

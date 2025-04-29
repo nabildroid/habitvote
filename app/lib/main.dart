@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:habitvote/core/network/connectivity.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:path/path.dart';
@@ -21,6 +22,8 @@ void main() async {
   await setUpErrorHandling();
   await setupAnalytics();
 
+  initConnectivity();
+
   final db = await setUpStorage();
   await setUpLocator(sembastInstance: db);
 
@@ -36,7 +39,7 @@ Future<Database> setUpStorage() async {
   final dir = await getApplicationDocumentsDirectory();
   await dir.create(recursive: true);
 
-  PreferenceExtension.globalPrefix = "20";
+  PreferenceExtension.globalPrefix = "21";
   final db = await databaseFactoryIo.openDatabase(
     join(dir.path, 'habitVote_v${PreferenceExtension.globalPrefix}.db'),
   );

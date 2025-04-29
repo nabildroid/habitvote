@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
+import 'package:habitvote/features/vote/presentation/utils/voting_popup_context_extension.dart';
 import 'package:habitvote/features/vote/presentation/widgets/vote_summary_bottom_sheet.dart';
 
 class TodayVotersWidget extends StatefulWidget {
@@ -66,7 +67,7 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
                     label: 'Believers',
                     description: 'They Say You Can',
                     isPositive: true,
-                    count: context.voteState.today?.down ?? 0,
+                    count: context.voteState.today?.up ?? 0,
                   ),
                 ],
               )
@@ -89,7 +90,10 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
     final showEmpty = context.watchVoteState.votes.length < 2 &&
         (context.voteState.today?.total ?? 0) == 0;
 
-    final showDescription = showEmpty && description != null;
+    final isVoteActivated = context.voteState.today?.isActivated == true;
+
+    final showDescription =
+        showEmpty && description != null && !isVoteActivated;
     // Use IntrinsicWidth to make the column take the width of its widest child
     return IntrinsicWidth(
       child: Column(
@@ -141,25 +145,17 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
             GestureDetector(
               onTap: () {
                 if (context.voteState.today?.isActivated == true) return;
-
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled:
-                      true, // Allows the sheet to take up more height if needed
-                  backgroundColor: Colors
-                      .transparent, // Make background transparent for custom shape
-                  builder: (context) => VoteSummaryBottomSheet(),
-                );
+                context.showVoteBottomsheet();
               },
               child: ImageFiltered(
                 imageFilter: ImageFilter.blur(
-                  sigmaX: 3,
-                  sigmaY: 2,
+                  sigmaX: isVoteActivated ? 0 : 3,
+                  sigmaY: isVoteActivated ? 0 : 2,
                 ),
                 child: Text(
                   count
                       .toString()
-                      .padLeft(2, '8'), // Pad with '8' for blur effect
+                      .padLeft(2, '0'), // Pad with '8' for blur effect
                   style: TextStyle(
                     color: Colors.white, // Darker grey for blurred effect
                     fontSize: 16, // Slightly larger font for blurred number

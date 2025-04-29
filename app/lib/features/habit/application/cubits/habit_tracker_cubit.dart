@@ -73,9 +73,10 @@ class HabitTrackerCubit extends Cubit<HabitTrackerState> {
 
   init({fresh = false}) async {
     final habit = await habitRepo.getActive(fresh: fresh);
+    if (habit == null) return;
     emit(state.copyWith(habit: habit));
 
-    final checkins = await trackerRepo.getAll(habit!.id, fresh: fresh);
+    final checkins = await trackerRepo.getAll(habit.id, fresh: fresh);
     emit(state.copyWith(checkins: checkins));
   }
 

@@ -9,9 +9,12 @@ class HabitHeatmapWidget extends StatefulWidget {
   final IconData habitIcon;
   final int startDayOfWeek; // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
 
+  final VoidCallback onTodayChecked;
+
   const HabitHeatmapWidget({
     super.key,
     this.startDayOfWeek = 1,
+    required this.onTodayChecked,
     required this.habitIcon, // Default to Monday
   });
 
@@ -357,6 +360,10 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
   // Handle tap on a cell
   void _handleTap(
       BuildContext context, DateTime date, CheckinModel? existingCheckin) {
+    final isToday = date.year == _today.year &&
+        date.month == _today.month &&
+        date.day == _today.day;
+
     if (existingCheckin == null) {
       // First tap - mark as completed (done=true)
       context.habitCubit.checkIn(isDone: true, date: date);
@@ -367,6 +374,10 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
     } else {
       // Third tap (on failed) - remove check-in
       context.habitCubit.undoCheckIn(date: date);
+    }
+
+    if (isToday) {
+      widget.onTodayChecked();
     }
   }
 

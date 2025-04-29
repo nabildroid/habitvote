@@ -1,13 +1,9 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:habitvote/core/locator.dart';
 import 'package:habitvote/features/habit/data/models/checkin_model.dart';
-import 'package:habitvote/features/habit/data/models/habit_model.dart';
-import 'package:habitvote/features/habit/data/sources/habit_cache.dart';
 import 'package:habitvote/features/habit/data/sources/tracker_remote.dart';
 import 'package:habitvote/services/kv_service.dart';
-import "package:rxdart/rxdart.dart";
 
 import '../sources/tracker_cache.dart';
 
@@ -17,13 +13,7 @@ class TrackerRepo {
 
   final KvService kv = locator.get(); // Get KvService instance
 
-  final isOnline = BehaviorSubject<bool>.seeded(false);
-
-  TrackerRepo({required this.cache, required this.remote}) {
-    Connectivity().onConnectivityChanged.listen((status) => isOnline.add(
-          !status.contains(ConnectivityResult.none),
-        ));
-  }
+  TrackerRepo({required this.cache, required this.remote});
 
   Future<List<CheckinModel>?> getAll(String habitId, {fresh = false}) async {
     final remoteFuture = remote.getAll(habitId: habitId).then((val) {

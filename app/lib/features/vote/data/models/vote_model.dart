@@ -47,6 +47,12 @@ class VoteModel {
     };
   }
 
+  VoteModel activate() {
+    final data = toJson();
+    data['isActivated'] = true;
+    return VoteModel.fromJson(data);
+  }
+
   @override
   String toString() => 'VoteModel(id: $id, habitId: $habitId)';
 }

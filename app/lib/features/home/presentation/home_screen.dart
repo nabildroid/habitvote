@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:habitvote/features/vote/presentation/utils/voting_popup_context_extension.dart';
 import 'package:habitvote/features/vote/presentation/widgets/today_voters.dart';
 
 import '../../habit/presentations/widgets/checkin_slider.dart';
@@ -50,10 +51,15 @@ class _HomeScreenState extends State<HomeScreen> {
               HabitHeatmapWidget(
                 habitIcon: Icons.book,
                 startDayOfWeek: 0, // 0 = Sunday
+                onTodayChecked: () => context.showVoteBottomsheet(),
               ),
             ]),
           ),
-          bottomNavigationBar: CheckinSliderWidget(),
+          bottomNavigationBar: CheckinSliderWidget(
+            onChecked: () {
+              context.showVoteBottomsheet();
+            },
+          ),
         ),
       ),
     );

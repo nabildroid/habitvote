@@ -10,6 +10,7 @@ import 'package:habitvote/features/habit/data/repositories/tracker_repository.da
 import 'package:habitvote/features/vote/data/models/candidat_model.dart';
 import 'package:habitvote/features/vote/data/models/vote_model.dart';
 import 'package:habitvote/features/vote/data/repositories/votes_repository.dart';
+import 'package:habitvote/shared/dates_utils.dart';
 import 'package:rxdart/rxdart.dart';
 
 class VotesState extends Equatable {
@@ -23,13 +24,17 @@ class VotesState extends Equatable {
   });
 
   VoteModel? get today {
-    // return votes.where((vote) => vote.openDate == DateTime.now()).firstOrNull;
-    return votes.firstOrNull;
+    return votes
+        .where((v) => v.openDate.diffDay(DateTime.now()) <= Duration(hours: 24))
+        .firstOrNull;
   }
 
   VoteModel? get yesterday {
-    // return votes.where((vote) => vote.openDate == DateTime.now()).firstOrNull;
-    return votes.firstOrNull;
+    return votes
+        .where((v) =>
+            v.openDate.diffDay(DateTime.now()) <= Duration(hours: 48) &&
+            v.openDate.diffDay(DateTime.now()) > Duration(hours: 24))
+        .firstOrNull;
   }
 
   factory VotesState.initial() {
@@ -126,7 +131,14 @@ class VotesCubit extends Cubit<VotesState> {
 
     final vote = state.today;
     if (vote != null) {
+      final updatedVotes = state.votes
+          .map((v) => v.id == vote.id ? vote.activate() : v)
+          .toList();
+
+      emit(state.copyWith(votes: updatedVotes));
+
       await repo.remote.activate(vote.id);
+      await repo.cache.put(vote.activate());
     }
   }
 }

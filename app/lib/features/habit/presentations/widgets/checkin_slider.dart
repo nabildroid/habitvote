@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
 
 class CheckinSliderWidget extends StatefulWidget {
-  const CheckinSliderWidget({super.key});
+  final VoidCallback onChecked;
+  const CheckinSliderWidget({super.key, required this.onChecked});
 
   @override
   State<CheckinSliderWidget> createState() => _CheckinSliderWidgetState();
@@ -38,7 +39,9 @@ class _CheckinSliderWidgetState extends State<CheckinSliderWidget> {
                     borderRadius: BorderRadius.circular(30),
                     border: Border.all(color: Color(0xff333333), width: 1),
                   ),
-                  child: SlideToConfirm(onConfirmed: (completed) {}),
+                  child: SlideToConfirm(onConfirmed: (completed) {
+                    widget.onChecked();
+                  }),
                 ),
               ),
               const SizedBox(width: 16),
@@ -163,6 +166,7 @@ class _SlideToConfirmState extends State<SlideToConfirm> {
               if (position >= 0.9) {
                 position = 1.0;
                 context.habitCubit.checkIn();
+                widget.onConfirmed(true);
               } else {
                 position = 0.0;
               }
