@@ -18,7 +18,7 @@
 - [X] Generate Random Bot Votes to everyone
 ------------------------
 - [X] Result of User's Vote for other people
-- [ ] Payment
+- [X] Payment
 ------------------------
 - [ ] Habit Reminder
 ------------------------

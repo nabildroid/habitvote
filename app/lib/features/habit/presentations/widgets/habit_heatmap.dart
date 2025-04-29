@@ -3,6 +3,7 @@ import 'package:habitvote/core/locator.dart';
 import 'package:habitvote/features/habit/data/models/checkin_model.dart';
 import 'package:habitvote/features/habit/data/repositories/habit_repository.dart';
 import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
+import 'package:habitvote/shared/ispro_context_extension.dart';
 import 'package:intl/intl.dart';
 
 class HabitHeatmapWidget extends StatefulWidget {
@@ -171,11 +172,7 @@ class _HabitHeatmapWidgetState extends State<HabitHeatmapWidget> {
               ),
               const SizedBox(width: 12),
               InkWell(
-                onTap: () async {
-                  final habits = await locator.get<HabitRepo>().getAll();
-
-                  print(habits);
-                },
+                onTap: context.getPremium,
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
                   padding: const EdgeInsets.all(8),

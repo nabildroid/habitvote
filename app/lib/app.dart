@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:habitvote/core/custom_router.dart';
+import 'package:habitvote/features/premium/application/premium_cubit.dart';
 import 'package:habitvote/features/user/application/cubits/auth_cubit.dart';
 import 'package:habitvote/features/vote/application/votes_cubit.dart';
 
@@ -18,6 +19,7 @@ class HabitVoteApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (ctx) => AuthCubit()..init(), lazy: false),
+        BlocProvider(create: (ctx) => PremiumCubit()..sync(ctx), lazy: false),
         BlocProvider(create: (ctx) => OnboardingCubit()),
         BlocProvider(create: (ctx) => HabitTrackerCubit()..init(), lazy: false),
         BlocProvider(

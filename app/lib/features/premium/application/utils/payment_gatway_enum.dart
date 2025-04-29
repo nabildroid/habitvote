@@ -1,0 +1,4 @@
+enum PaymentGatway {
+  stripe,
+  google,
+}

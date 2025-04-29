@@ -4,9 +4,11 @@ import 'package:habitvote/features/habit/data/repositories/tracker_repository.da
 import 'package:habitvote/features/habit/data/sources/habit_remote.dart';
 import 'package:habitvote/features/habit/data/sources/tracker_cache.dart';
 import 'package:habitvote/features/habit/data/sources/tracker_remote.dart';
+import 'package:habitvote/features/premium/data/repository/payment_repository.dart';
 import 'package:habitvote/features/vote/data/repositories/votes_repository.dart';
 import 'package:habitvote/features/vote/data/sources/votes_cache.dart';
 import 'package:habitvote/features/vote/data/sources/votes_remote.dart';
+import 'package:habitvote/services/feature_flag_service.dart';
 import 'package:logger/logger.dart';
 import 'package:sembast/sembast.dart';
 import 'package:habitvote/features/habit/data/repositories/habit_repository.dart';
@@ -31,6 +33,9 @@ Future<void> setUpLocator({required Database sembastInstance}) async {
       () => VotesRepo(cache: VotesCache(), remote: VotesRemote()));
 
   locator.registerSingleton(AuthService()..fetch());
+  locator.registerSingleton(FeatureFlagService());
+
+  locator.registerSingleton(PaymentRepo());
 
   locator.registerSingleton(RouteObserver<ModalRoute<dynamic>>());
 }

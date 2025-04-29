@@ -63,7 +63,7 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
                   ),
                   if (ups + downs > 1 && !isPro && isActivated)
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () => context.getPremium(),
                       child: Text(
                         "unhide the ${ups + downs - 1} votes",
                         style: TextStyle(

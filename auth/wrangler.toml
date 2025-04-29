@@ -6,7 +6,7 @@ compatibility_flags = [ "nodejs_compat" ]
 [vars]
 GOOGLE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@habitvote-5f341.iam.gserviceaccount.com"
 JWT_ISS = "habitvote-auth-cloudflare"
-ANDROID_PACKAGE_NAME = "me.laknabil.habitvote"
+ANDROID_PACKAGE_NAME = "me.laknabil.voca"
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
 # id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

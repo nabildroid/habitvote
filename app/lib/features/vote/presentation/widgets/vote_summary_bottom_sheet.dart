@@ -6,7 +6,8 @@ import 'package:habitvote/features/onboarding/presentration/widgets/brilliant_ok
 import 'dart:ui';
 
 import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
-import 'package:habitvote/features/vote/presentation/widgets/candidats_voting_bottom_sheet.dart'; // Required for ImageFilter.blur
+import 'package:habitvote/features/vote/presentation/widgets/candidats_voting_bottom_sheet.dart';
+import 'package:habitvote/shared/ispro_context_extension.dart'; // Required for ImageFilter.blur
 
 final _ctas = [
   "Vote to Reveal Your Votes",
@@ -130,7 +131,7 @@ class _VoteSummaryBottomSheetState extends State<VoteSummaryBottomSheet> {
                 borderRadius: BorderRadius.circular(30.0),
               ),
             ),
-            onPressed: () {},
+            onPressed: context.getPremium,
             child: Text(
               "show me without voting", // Random CTA from the list
               style: TextStyle(fontSize: 16, color: Colors.black),
