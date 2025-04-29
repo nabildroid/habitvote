@@ -1,10 +1,12 @@
 import 'dart:math' as math;
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
 import 'package:habitvote/features/vote/presentation/utils/voting_popup_context_extension.dart';
 import 'package:habitvote/features/vote/presentation/widgets/vote_summary_bottom_sheet.dart';
+import 'package:habitvote/shared/ispro_context_extension.dart';
 
 class TodayVotersWidget extends StatefulWidget {
   // add empty-state toggle
@@ -36,6 +38,11 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
 
   @override
   Widget build(BuildContext context) {
+    final isPro = context.watchIsPro();
+    final isActivated = context.voteState.today?.isActivated == true;
+    final ups = context.voteState.today?.up ?? 0;
+    final downs = context.voteState.today?.down ?? 0;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
@@ -43,34 +50,55 @@ class _TodayVotersWidgetState extends State<TodayVotersWidget>
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'TODAY',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                spacing: 0,
+                children: [
+                  const Text(
+                    'TODAY',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (ups + downs > 1 && !isPro && isActivated)
+                    TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        "unhide the ${ups + downs - 1} votes",
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    )
+                ],
               ),
-              const SizedBox(height: 12),
               Row(
                 children: [
                   _buildVoteTypeWidget(
-                    emoji: '😑',
-                    label: 'Challengers',
-                    description: 'They Say You Can\'t',
-                    isPositive: false,
-                    count: context.voteState.today?.down ?? 0,
-                  ),
+                      emoji: '😑',
+                      label: 'Challengers',
+                      description: 'They Say You Can\'t',
+                      isPositive: false,
+                      count: isPro
+                          ? downs
+                          : downs > 0
+                              ? 1
+                              : 0),
                   const SizedBox(width: 16),
                   _buildVoteTypeWidget(
                     emoji: '😎',
                     label: 'Believers',
                     description: 'They Say You Can',
                     isPositive: true,
-                    count: context.voteState.today?.up ?? 0,
+                    count: isPro
+                        ? ups
+                        : ups > 0
+                            ? 1
+                            : 0,
                   ),
                 ],
-              )
+              ),
             ],
           ),
           const Spacer(),
