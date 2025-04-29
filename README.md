@@ -14,14 +14,15 @@
 - [X] Save Habit
 - [X] Save Records
 ------------------------
-- [ ] Ability to vote for people to activate todays votes (make the votes visible)
-- [ ] Generate Random Bot Votes to everyone
+- [X] Ability to vote for people to activate todays votes (make the votes visible)
+- [X] Generate Random Bot Votes to everyone
 ------------------------
-- [ ] Result of User's Vote for other people
+- [X] Result of User's Vote for other people
 - [ ] Payment
 ------------------------
 - [ ] Habit Reminder
-- [ ] Allowed closed Window for ticking the Habit
 ------------------------
 - [ ] Add Setting Screen
 - [ ] Ability to change the habit
+-------------
+- [ ] Allowed closed Window for ticking the Habit
