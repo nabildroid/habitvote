@@ -5,7 +5,12 @@ import 'package:habitvote/services/notification_service.dart';
 
 /// Shows a dialog asking the user to activate notifications.
 /// Returns true if “Activate” was tapped.
-Future<bool?> showActivateNotificationDialog(BuildContext context) {
+Future<bool?> showActivateNotificationDialog(BuildContext context) async {
+  final isEnabled =
+      await locator.get<NotificationService>().isNotificationEnabled();
+
+  if (isEnabled) return null;
+
   final theme = Theme.of(context);
   return showDialog<bool>(
     context: context,
@@ -48,9 +53,9 @@ Future<bool?> showActivateNotificationDialog(BuildContext context) {
       actions: [
         BrilliantOkButton(
           text: 'Activate',
-          onPressed: () {
-            locator.get<NotificationService>().requestPremission();
-            // Navigator.of(context).pop(true);
+          onPressed: () async {
+            await locator.get<NotificationService>().registerDevice();
+            Navigator.of(context).pop(true);
           },
         )
       ],

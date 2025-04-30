@@ -4,6 +4,7 @@ import { Firebase } from "../repositories/firebase";
 import type { IHabit } from "../db/types";
 import { generateVoteId } from "../utils";
 import Admin from "firebase-admin";
+import { getNotificationTokens } from "../repositories/notifications";
 
 const VotesRoute = new Hono();
 
@@ -50,7 +51,7 @@ VotesRoute.post("/:voteId/activate", async (c) => {
             isActivated: true,
             lastUpdate: new Date()
         });
-        
+
         return c.json({ success: true });
     } catch (error) {
         console.error("Error activating vote:", error);
@@ -124,6 +125,33 @@ async function VoteOn(parmas: {
     try { await ref.create(vote); }
     catch (e) { await ref.set(vote, { mergeFields }); }
 
+    const tokens = await getNotificationTokens();
+    const notificationToken = tokens[parmas.userId];
+    if (!notificationToken) return;
+
+
+    await Firebase.messaging().send({
+        token: notificationToken,
+
+        data: {
+            habitId: parmas.habitId,
+            voteId: voteId,
+            decision: parmas.decision
+        },
+        android: {
+            priority: "high",
+            notification: {
+                channelId: "vote_channel",
+                priority: "high",
+                title: "Habit Vote",
+                body: `You have a new vote on your habit!`,
+                clickAction: "FLUTTER_NOTIFICATION_CLICK",
+            },
+        },
+
+    }).catch((e) => {
+        console.error("Error sending notification:", e);
+    });
 }
 
 

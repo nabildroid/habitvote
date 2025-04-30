@@ -5,6 +5,7 @@ import { poweredBy } from 'hono/powered-by';
 import HabitRoute from './routes/habits';
 import CheckinRoute from './routes/checkins';
 import VotesRoute from './routes/votes';
+import UserRoute from './routes/user';
 
 const app = new Hono()
 app.use(poweredBy({ serverName: "Laknabil.me" }))
@@ -42,6 +43,7 @@ app.use(async (c, next) => {
 app.route("/habits", HabitRoute);
 app.route("/checkin", CheckinRoute);
 app.route("/votes", VotesRoute);
+app.route("/user", UserRoute);
 
 
 

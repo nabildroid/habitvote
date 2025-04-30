@@ -2,8 +2,10 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:habitvote/core/locator.dart';
 import 'package:habitvote/features/vote/presentation/utils/voting_popup_context_extension.dart';
 import 'package:habitvote/features/vote/presentation/widgets/today_voters.dart';
+import 'package:habitvote/services/notification_service.dart';
 
 import '../../habit/presentations/widgets/checkin_slider.dart';
 import 'widgets/custom_app_bar.dart';
@@ -21,6 +23,18 @@ class _HomeScreenState extends State<HomeScreen> {
   double sliderPosition = 0.5;
   bool isCheckedIn = false;
   DateTime checkInTime = DateTime.now().add(const Duration(hours: 2));
+
+  void onCheckin(BuildContext context) {
+    context.showVoteBottomsheet();
+
+    locator.get<NotificationService>().scheduleNotification(
+          NotificationChannelType.reminder,
+          id: 1,
+          title: "Check-in Reminder",
+          body: "Don't forget to check in today!",
+          scheduledDate: DateTime.now().add(Duration(days: 1)),
+        );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,14 +65,12 @@ class _HomeScreenState extends State<HomeScreen> {
               HabitHeatmapWidget(
                 habitIcon: Icons.book,
                 startDayOfWeek: 0, // 0 = Sunday
-                onTodayChecked: () => context.showVoteBottomsheet(),
+                onTodayChecked: () => onCheckin(context),
               ),
             ]),
           ),
           bottomNavigationBar: CheckinSliderWidget(
-            onChecked: () {
-              context.showVoteBottomsheet();
-            },
+            onChecked: () => onCheckin(context),
           ),
         ),
       ),

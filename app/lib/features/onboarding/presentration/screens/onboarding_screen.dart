@@ -637,44 +637,87 @@ class _HabitChooserState extends State<HabitChooser> {
   final FocusNode _focusNode = FocusNode();
   // String? _selectedPredefinedHabit; // Removed, rely on cubit state
 
-  // Example habit data structure: Map<CategoryName, List<MapEntry<IconData, HabitTitle>>>
-  final Map<String, List<MapEntry<IconData, String>>> _habitGroups = const {
-    // Made const
-    'Health & Fitness': [
-      MapEntry(Icons.fitness_center, 'Exercise Regularly'),
-      MapEntry(Icons.water_drop, 'Drink More Water'),
-      MapEntry(Icons.restaurant, 'Eat Healthier'),
-      MapEntry(Icons.bedtime, 'Sleep Earlier'),
+  // --- Positive Habits Data ---
+  static const Map<String, List<MapEntry<IconData, String>>>
+      _positiveHabitGroups = {
+    'Digital Wellness': [
+      MapEntry(Icons.phone_android_outlined, 'Grayscale Phone after 9 PM'),
+      MapEntry(Icons.savings_outlined, 'Save \$5 on Doomscroll >10min'),
+      MapEntry(Icons.directions_walk, 'Take "Rage Walk" (No Phone)'),
+      MapEntry(Icons.delete_sweep_outlined, 'Delete Delivery Apps After Use'),
+      MapEntry(Icons.reply_outlined, 'Reply DMs within 24h'),
+      MapEntry(Icons.photo_camera_back_outlined, 'Vibe Check Before Posting'),
+      MapEntry(Icons.send_outlined, 'Text Meme to Friend'),
+      MapEntry(Icons.block_flipped, 'Block Distractions after 8 PM'),
+      MapEntry(Icons.power_off_outlined, 'Charge Devices Elsewhere'),
+      MapEntry(Icons.mic_none_outlined, '1-Sentence Voice Journal'),
+      MapEntry(Icons.do_not_disturb_on_outlined, 'Skip 1 "Trauma Dump" Convo'),
     ],
-    'Productivity': [
-      MapEntry(Icons.book, 'Read Daily'),
-      MapEntry(Icons.work, 'Focus Work'),
-      MapEntry(Icons.cleaning_services, 'Tidy Up Space'),
-      MapEntry(Icons.timer, 'Time Management'),
+    'Productivity & Learning': [
+      MapEntry(Icons.cleaning_services_outlined, '1-Min Speed Clean (Ads)'),
+      MapEntry(Icons.work_outline, 'Open Job App Before Gaming'),
+      MapEntry(Icons.book_outlined, 'Open Textbook Before Netflix'),
+      MapEntry(Icons.bookmark_add_outlined, 'Bookmark Recipes You Cook'),
+      MapEntry(Icons.speed_outlined, 'Podcast 2x Speed (Chores)'),
+      MapEntry(Icons.edit_note_outlined, 'Replace "Busy" Correctly'),
     ],
-    'Mindfulness': [
-      MapEntry(Icons.self_improvement, 'Meditate'),
-      MapEntry(Icons.book_online, 'Journaling'),
-      MapEntry(Icons.nature_people, 'Spend Time Outside'),
-      MapEntry(Icons.favorite, 'Practice Gratitude'),
+    'Sustainability & Finance': [
+      MapEntry(Icons.coffee_maker_outlined, 'Use Reusable Coffee Cup'),
+      MapEntry(Icons.sell_outlined, 'Photo Outfit for Resale'),
+      MapEntry(Icons.recycling_outlined, 'Leave 1 Toxic Group Weekly'),
     ],
-    'Learning': [
-      MapEntry(Icons.language, 'Learn Language'),
-      MapEntry(Icons.code, 'Code Daily'),
-      MapEntry(Icons.music_note, 'Practice Instrument'),
-      MapEntry(Icons.school, 'Study Subject'),
-    ],
-    // Add more categories/habits as needed
   };
+
+  // --- Negative Habits Data ---
+  static const Map<String, List<MapEntry<IconData, String>>>
+      _negativeHabitGroups = {
+    'Digital Habits to Break': [
+      MapEntry(Icons.textsms_outlined, 'Stop 100+ Unread Texts'),
+      MapEntry(Icons.subtitles_off_outlined, 'Stop Always Using Subtitles'),
+      MapEntry(Icons.screenshot_monitor_outlined, 'Stop Screenshotting Inspo'),
+      MapEntry(Icons.bed_outlined, 'Stop Using Bed as Desk'),
+      MapEntry(Icons.smart_display_outlined, 'Stop Watching "Study With Me"'),
+      MapEntry(Icons.tab_unselected_outlined, 'Stop Keeping 50+ Tabs Open'),
+      MapEntry(Icons.phonelink_erase_outlined, 'Stop 2 AM Scrolling'),
+      MapEntry(Icons.visibility_off_outlined, 'Stop "Seen" Ghosting'),
+    ],
+    'Spending & Consumption': [
+      MapEntry(Icons.fastfood_outlined, 'Stop Ordering Food When Bored'),
+      MapEntry(Icons.coffee_outlined, 'Stop \$7 Lattes (False Productivity)'),
+      MapEntry(Icons.shopping_bag_outlined, 'Stop Fast Fashion (One Use)'),
+      MapEntry(Icons.storefront_outlined, 'Stop Shein/Temu after 8 PM'),
+    ],
+    'Mindset & Social': [
+      MapEntry(Icons.event_busy_outlined, 'Stop "Start Monday" Excuse'),
+      MapEntry(
+          Icons.sentiment_dissatisfied_outlined, 'Stop Saying "I\'m Fine"'),
+      MapEntry(
+          Icons.phone_disabled_outlined, 'Stop Calling Family Only for \$'),
+      MapEntry(
+          Icons.cancel_presentation_outlined, 'Stop Saying Yes & Canceling'),
+      MapEntry(Icons.workspaces_outline, 'Stop Pretending Work in Cafes'),
+      MapEntry(Icons.folder_delete_outlined, 'Stop Hoarding Free PDFs'),
+      MapEntry(
+          Icons.mark_email_unread_outlined, 'Stop Apologizing "Double Text"'),
+    ],
+  };
+
+  // Removed single _habitGroups map
 
   @override
   void initState() {
     super.initState();
     // Initialize text field if cubit has a custom habit value
-    final initialHabit = context.read<OnboardingCubit>().state.selectedHabit;
+    final cubit = context.read<OnboardingCubit>();
+    final initialHabit = cubit.state.selectedHabit;
+    final habitType = cubit.state.habitType; // Get habit type
+
     bool isPredefined = false;
-    if (initialHabit != null) {
-      for (var group in _habitGroups.values) {
+    if (initialHabit != null && habitType != null) {
+      // Check against the correct list based on type
+      final groupsToCheck =
+          habitType == 'good' ? _positiveHabitGroups : _negativeHabitGroups;
+      for (var group in groupsToCheck.values) {
         if (group.any((entry) => entry.value == initialHabit)) {
           isPredefined = true;
           break;
@@ -687,22 +730,35 @@ class _HabitChooserState extends State<HabitChooser> {
 
     _customHabitController.addListener(() {
       final text = _customHabitController.text;
-      // Update cubit only if text is not empty and differs from current state
-      // Or if text becomes empty
       final currentHabit = context.read<OnboardingCubit>().state.selectedHabit;
       if (text.isNotEmpty) {
-        // If user types, update cubit with text
-        // This implicitly deselects any predefined habit in the cubit state
         if (currentHabit != text) {
           context.read<OnboardingCubit>().setSelectedHabit(text);
         }
       } else {
-        // If text is cleared, update cubit to null only if it wasn't already null
         if (currentHabit != null) {
-          context.read<OnboardingCubit>().setSelectedHabit(null);
+          // Check if the current habit was predefined before clearing
+          final habitType = context.read<OnboardingCubit>().state.habitType;
+          bool wasPredefined = false;
+          if (habitType != null) {
+            final groupsToCheck = habitType == 'good'
+                ? _positiveHabitGroups
+                : _negativeHabitGroups;
+            for (var group in groupsToCheck.values) {
+              if (group.any((entry) => entry.value == currentHabit)) {
+                wasPredefined = true;
+                break;
+              }
+            }
+          }
+          // Only clear cubit state if the text field is cleared AND the current state wasn't a predefined one
+          // Or if it was a custom one that's now empty.
+          if (!wasPredefined || currentHabit == text) {
+            // Allow clearing if it was custom text
+            context.read<OnboardingCubit>().setSelectedHabit(null);
+          }
         }
       }
-      // No need for setState here unless UI depends directly on _selectedPredefinedHabit
     });
   }
 
@@ -773,12 +829,13 @@ class _HabitChooserState extends State<HabitChooser> {
                     SizedBox(width: 8),
                     Expanded(
                       // Use Flexible + Text instead of FittedBox for better control
-                      child: Text(
-                        habitTitle,
-                        style: TextStyle(
-                            fontWeight: FontWeight.w500, fontSize: 13),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1, // Ensure single line
+                      child: Center(
+                        child: Text(
+                          habitTitle,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500, fontSize: 13),
+                          maxLines: 2, // Ensure single line
+                        ),
                       ),
                     ),
                   ],
@@ -794,7 +851,26 @@ class _HabitChooserState extends State<HabitChooser> {
   @override
   Widget build(BuildContext context) {
     // Use BlocBuilder or context.watch for reactive UI updates
-    // final selectedHabit = context.watch<OnboardingCubit>().state.selectedHabit;
+    final state = context.watch<OnboardingCubit>().state;
+    final habitType = state.habitType; // 'good' or 'bad'
+    final selectedHabitGroups = (habitType == 'good')
+        ? _positiveHabitGroups
+        : _negativeHabitGroups; // Default to negative if null? Or handle error.
+
+    // Determine title and hint text based on habitType
+    final String titleText = (habitType == 'good')
+        ? "Choose or Define a GOOD Habit"
+        : "Choose or Define a BAD Habit to Stop";
+    final String hintText = (habitType == 'good')
+        ? 'E.g., Read one chapter daily'
+        : 'E.g., Stop scrolling social media after 10 PM';
+    final String buttonText =
+        (habitType == 'good') ? "Write New GOOD Habit" : "Write New BAD Habit";
+
+    // Handle case where habitType might be null (shouldn't happen if flow is correct)
+    if (habitType == null) {
+      return Center(child: Text("Error: Habit type not selected."));
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -802,7 +878,7 @@ class _HabitChooserState extends State<HabitChooser> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ... Title and Subtitle ...
-          Text("Choose or Define Your Habit",
+          Text(titleText, // Use dynamic title
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
@@ -817,7 +893,7 @@ class _HabitChooserState extends State<HabitChooser> {
             controller: _customHabitController,
             focusNode: _focusNode,
             decoration: InputDecoration(
-              hintText: 'E.g., Stop scrolling social media',
+              hintText: hintText, // Use dynamic hint text
               prefixIcon:
                   Icon(Icons.edit_outlined, color: Colors.grey.shade600),
               filled: true,
@@ -831,32 +907,29 @@ class _HabitChooserState extends State<HabitChooser> {
             ),
             onTap: () {
               // Tapping text field implicitly deselects predefined via listener logic
-              // if (_customHabitController.text.isEmpty && context.read<OnboardingCubit>().state.selectedHabit != null) {
-              //    // If text field is empty but a predefined habit was selected, clear the cubit state
-              //    context.read<OnboardingCubit>().setSelectedHabit(null);
-              // }
+              // If text field is empty when tapped, ensure cubit state is cleared
+              if (_customHabitController.text.isEmpty) {
+                context.read<OnboardingCubit>().setSelectedHabit(null);
+              }
             },
             // onChanged handled by listener in initState
           ),
           SizedBox(height: 20),
           Expanded(
             // Use BlocBuilder here to rebuild habit groups when state changes
-            child: BlocBuilder<OnboardingCubit, OnboardingState>(
-                builder: (context, state) {
-              // Rebuild the list view when selectedHabit changes
-              return ListView(
-                controller: _scrollController,
-                children: _habitGroups.entries
-                    .map((entry) => _buildHabitGroup(entry.key, entry.value))
-                    .toList(),
-              );
-            }),
+            // No need for BlocBuilder if context.watch is used above for state
+            child: ListView(
+              controller: _scrollController,
+              children: selectedHabitGroups.entries // Use selected groups
+                  .map((entry) => _buildHabitGroup(entry.key, entry.value))
+                  .toList(),
+            ),
           ),
           SizedBox(height: 10),
           Center(
             child: TextButton.icon(
               icon: Icon(Icons.arrow_upward_rounded),
-              label: Text("Write New Habit"),
+              label: Text(buttonText), // Use dynamic button text
               onPressed: _scrollToTopAndFocus,
               style: TextButton.styleFrom(
                 foregroundColor:
