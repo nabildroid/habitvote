@@ -74,6 +74,35 @@ PublicAPI.post("/loginWithGoogle", async (c) => {
 
 
 
+PublicAPI.post("/anonymous", async (c) => {
+    // if (process.env.NODE_ENV !== "development") {
+    //     return c.notFound()
+    // }
+
+    let user: any;
+
+    const query = await drizzle(c.env.DB).insert(usersTable).values({
+        uid: generateID(),
+        email: generateID() + "@anonymous.com",
+        displayName: "User " + generateID().slice(0, 6),
+        photoUrl: "https://ui-avatars.com/api/?name=" + generateID() + "&background=random&size=256",
+    }).returning()
+
+    user = query[0];
+
+    console.log(user);
+
+    const session = new TokenJWT(c.env);
+    const { token, expires } = await session.signShort(user);
+    const { token: refreshToken } = await session.signLong({ uid: user.uid });
+
+    return c.json({ success: true, uid: user.uid, token, refreshToken, expires })
+});
+
+
+
+
+
 PublicAPI.post("/refresh", async (c) => {
     const { token } = await c.req.json()
     const { payload, session } = await TokenJWT.fromRefreshToken(token, c.env);

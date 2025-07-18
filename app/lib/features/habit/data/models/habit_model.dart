@@ -1,4 +1,5 @@
 import "package:equatable/equatable.dart";
+import "package:flutter/material.dart";
 import "package:uuid/uuid.dart";
 
 /// Model class representing a habit
@@ -20,12 +21,17 @@ class HabitModel extends Equatable {
 
   final bool isActive = true;
 
+  final TimeOfDay checkinOpenWindow;
+  final TimeOfDay checkinCloseWindow;
+
   HabitModel({
     String? id,
     required this.name,
     required this.description,
     required this.isNegative,
     required this.publicName,
+    this.checkinOpenWindow = const TimeOfDay(hour: 0, minute: 0),
+    this.checkinCloseWindow = const TimeOfDay(hour: 23, minute: 0),
     DateTime? createdAt,
   }) : id = id ?? const Uuid().v4();
 

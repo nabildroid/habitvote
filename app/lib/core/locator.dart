@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:habitvote/features/habit/data/repositories/tracker_repository.dart';
@@ -37,10 +39,11 @@ Future<void> setUpLocator({required Database sembastInstance}) async {
   locator.registerSingleton(AuthService()..fetch());
   locator.registerSingleton(FeatureFlagService());
 
+  if (Platform.isAndroid) {
+    locator.registerSingleton(FirebaseService());
+    locator.registerSingleton(NotificationService());
+  }
   locator.registerSingleton(PaymentRepo());
-
-  locator.registerSingleton(FirebaseService());
-  locator.registerSingleton(NotificationService());
 
   locator.registerSingleton(RouteObserver<ModalRoute<dynamic>>());
 }

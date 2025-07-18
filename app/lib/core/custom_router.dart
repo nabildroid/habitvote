@@ -42,34 +42,6 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: "/home",
       builder: (context, state) => const HomeScreen(),
-      routes: [
-        GoRoute(
-          path: "favorites",
-          pageBuilder: (context, state) => CustomTransitionPage<void>(
-            key: state.pageKey,
-            child: const Placeholder(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              const begin = Offset(0.0, 1.0);
-              const end = Offset.zero;
-              const curve = Curves.easeInOutCubic;
-
-              var tween =
-                  Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-              var offsetAnimation = animation.drive(tween);
-
-              return SlideTransition(
-                position: offsetAnimation,
-                child: child,
-              );
-            },
-            barrierDismissible: true,
-            barrierColor: Colors.black38,
-            opaque: false,
-            maintainState: true,
-          ),
-        ),
-      ],
     ),
     GoRoute(
       path: "/onboarding",

@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:habitvote/features/onboarding/presentration/screens/create_account_slide.dart';
+import 'package:habitvote/features/user/presentation/screens/create_account_slide.dart';
 import 'package:habitvote/features/onboarding/presentration/widgets/habitVoteDifference.dart';
 import 'package:habitvote/features/onboarding/presentration/widgets/brilliant_ok_button.dart';
 import 'package:intl/intl.dart'; // Import for date formatting

@@ -123,12 +123,12 @@ export default class GoogleProvider {
 
 
 
-    async getUser(token: string, allowUnverifiedEmail = false) {
+    async getUser(oauthToken: string, allowUnverifiedEmail = false) {
         console.time("GoogleUserFetcher")
         const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${oauthToken}`,
                 'Content-Type': 'application/json',
                 'Cache-Control': 'no-cache',
                 Host: 'www.googleapis.com',

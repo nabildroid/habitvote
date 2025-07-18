@@ -61,16 +61,15 @@ Future<Database> setUpStorage() async {
 }
 
 Future<void> setupAnalytics() async {
-  if (Platform.isAndroid) {
-    // final config =
-    //     PostHogConfig('phc_qKJNHn1RX2l75TYuzvr2zbToLu2ilYTI1n8k6lTqXIK');
-    // // config.debug = true;
-    // config.captureApplicationLifecycleEvents = true;
-    // config.debug = !kReleaseMode;
-    // config.host = 'https://eu.i.posthog.com';
+  if (!Platform.isAndroid) return;
+  // final config =
+  //     PostHogConfig('phc_qKJNHn1RX2l75TYuzvr2zbToLu2ilYTI1n8k6lTqXIK');
+  // // config.debug = true;
+  // config.captureApplicationLifecycleEvents = true;
+  // config.debug = !kReleaseMode;
+  // config.host = 'https://eu.i.posthog.com';
 
-    // await Posthog().setup(config);
-  }
+  // await Posthog().setup(config);
 }
 
 Future<void> setUpErrorHandling() async {
@@ -94,6 +93,8 @@ Future<void> setUpSplashScreen(WidgetsBinding widgetsBinding) async {
 }
 
 Future<void> initNotification() async {
+  if (!Platform.isAndroid) return;
+
   final firebaseService = locator<FirebaseService>();
   await firebaseService.init();
   final notificationService = locator<NotificationService>();

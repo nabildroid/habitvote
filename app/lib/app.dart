@@ -43,7 +43,7 @@ class HabitVoteApp extends StatelessWidget {
         locale: const Locale('en'),
         theme: ThemeData(
           scaffoldBackgroundColor: Colors.black,
-          primaryColor: const Color(0xFFCBE724), // Bright green color
+          primaryColor: const Color(0xFF008080),
           textTheme: GoogleFonts.vazirmatnTextTheme(),
         ),
         routerConfig: router,

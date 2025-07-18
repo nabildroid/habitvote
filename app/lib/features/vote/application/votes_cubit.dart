@@ -25,15 +25,16 @@ class VotesState extends Equatable {
 
   VoteModel? get today {
     return votes
-        .where((v) => v.openDate.diffDay(DateTime.now()) <= Duration(hours: 24))
+        .where(
+            (v) => v.createdAt.diffDay(DateTime.now()) <= Duration(hours: 24))
         .firstOrNull;
   }
 
   VoteModel? get yesterday {
     return votes
         .where((v) =>
-            v.openDate.diffDay(DateTime.now()) <= Duration(hours: 48) &&
-            v.openDate.diffDay(DateTime.now()) > Duration(hours: 24))
+            v.createdAt.diffDay(DateTime.now()) <= Duration(hours: 48) &&
+            v.createdAt.diffDay(DateTime.now()) > Duration(hours: 24))
         .firstOrNull;
   }
 
@@ -129,17 +130,17 @@ class VotesCubit extends Cubit<VotesState> {
   activateTodayVotes() async {
     print("activing todays vote");
 
-    final vote = state.today;
-    if (vote != null) {
-      final updatedVotes = state.votes
-          .map((v) => v.id == vote.id ? vote.activate() : v)
-          .toList();
+    // final vote = state.today;
+    // if (vote != null) {
+    //   final updatedVotes = state.votes
+    //       .map((v) => v.id == vote.id ? vote.activate() : v)
+    //       .toList();
 
-      emit(state.copyWith(votes: updatedVotes));
+    //   emit(state.copyWith(votes: updatedVotes));
 
-      await repo.remote.activate(vote.id);
-      await repo.cache.put(vote.activate());
-    }
+    //   await repo.remote.activate(vote.id);
+    //   await repo.cache.put(vote.activate());
+    // }
   }
 }
 

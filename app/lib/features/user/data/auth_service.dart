@@ -158,6 +158,27 @@ extension AuthProviders on AuthService {
 
     return null;
   }
+
+  Future<AccessTokenModel?> anonymousLogin() async {
+    final googleSignIn = GoogleSignIn(scopes: []);
+    try {
+      final response = await http.post("/anonymous");
+
+      final accessToken = AccessTokenModel(
+        expires: DateTime.fromMillisecondsSinceEpoch(
+            response.data["expires"] * 1000),
+        refreshToken: response.data["refreshToken"],
+        token: response.data["token"],
+      );
+      _saveAccessToken(accessToken);
+
+      return accessToken;
+    } catch (error) {
+      print(error);
+    }
+
+    return null;
+  }
 }
 
 extension on KvService {

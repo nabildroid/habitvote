@@ -9,7 +9,7 @@ import 'package:habitvote/features/onboarding/application/cubits/onboarding_cubi
 import 'package:habitvote/features/user/data/auth_service.dart';
 import 'package:habitvote/features/user/utils/onboarding_signup_extension.dart';
 
-import '../widgets/brilliant_ok_button.dart';
+import '../../../onboarding/presentration/widgets/brilliant_ok_button.dart';
 
 class CreateAccountSlide extends StatelessWidget {
   const CreateAccountSlide({super.key});
@@ -43,6 +43,16 @@ class CreateAccountSlide extends StatelessWidget {
             },
             text: "Sign in with Google",
           ),
+          if (DateTime.now().isBefore(DateTime(2025, 8, 1)))
+            BrilliantOkButton(
+              tag: "Guesst",
+              onPressed: () async {
+                context.go("/home");
+
+                await locator.get<AuthService>().anonymousLogin();
+              },
+              text: "Guest Sign in",
+            ),
           SizedBox(height: 16),
           // TextButton(
           //   child: Text(
