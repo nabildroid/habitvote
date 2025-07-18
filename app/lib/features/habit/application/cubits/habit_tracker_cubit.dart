@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:habitvote/core/locator.dart';
 import 'package:habitvote/features/habit/data/models/checkin_model.dart';
 import 'package:habitvote/features/habit/data/models/habit_model.dart';
 import 'package:habitvote/features/habit/data/repositories/habit_repository.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../data/repositories/tracker_repository.dart';
 
@@ -58,6 +62,9 @@ class HabitTrackerState extends Equatable {
 class HabitTrackerCubit extends Cubit<HabitTrackerState> {
   final trackerRepo = locator.get<TrackerRepo>();
   final habitRepo = locator.get<HabitRepo>();
+
+  final durationToOpenWindow = BehaviorSubject<Duration>.seeded(Duration.zero);
+
   HabitTrackerCubit()
       : super(HabitTrackerState(
           habit: HabitModel(
@@ -75,6 +82,7 @@ class HabitTrackerCubit extends Cubit<HabitTrackerState> {
     final habit = await habitRepo.getActive(fresh: fresh);
     if (habit == null) return;
     emit(state.copyWith(habit: habit));
+    this._startTimer();
 
     final checkins = await trackerRepo.getAll(habit.id, fresh: fresh);
     emit(state.copyWith(checkins: checkins));
@@ -125,5 +133,65 @@ class HabitTrackerCubit extends Cubit<HabitTrackerState> {
               e.date.day == date.day,
         )
         .firstOrNull;
+  }
+
+  @override
+  Future<void> close() {
+    this._cancelTimer();
+    durationToOpenWindow.close();
+    return super.close();
+  }
+}
+
+extension HabitTimerExtension on HabitTrackerCubit {
+  static Timer? _timer;
+
+  void _startTimer() {
+    _cancelTimer();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _updateDuration();
+    });
+  }
+
+  void _cancelTimer() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  void _updateDuration() {
+    final habit = state.habit;
+    if (habit?.checkinOpenWindow == null || habit?.checkinCloseWindow == null) {
+      durationToOpenWindow.add(Duration.zero);
+      return;
+    }
+
+    final now = DateTime.now();
+    final openTime = habit!.checkinOpenWindow;
+    final closeTime = habit.checkinCloseWindow;
+
+    var openDateTime =
+        DateTime(now.year, now.month, now.day, openTime.hour, openTime.minute);
+    var closeDateTime = DateTime(
+        now.year, now.month, now.day, closeTime.hour, closeTime.minute);
+
+    if (closeDateTime.isBefore(openDateTime)) {
+      if (now.isBefore(closeDateTime)) {
+        openDateTime = openDateTime.subtract(const Duration(days: 1));
+      } else {
+        closeDateTime = closeDateTime.add(const Duration(days: 1));
+      }
+    }
+
+    if (now.isAfter(openDateTime) && now.isBefore(closeDateTime)) {
+      durationToOpenWindow.add(Duration.zero);
+    } else {
+      DateTime nextOpenDateTime;
+      if (now.isBefore(openDateTime)) {
+        nextOpenDateTime = openDateTime;
+      } else {
+        nextOpenDateTime = openDateTime.add(const Duration(days: 1));
+      }
+      durationToOpenWindow.add(nextOpenDateTime.difference(now));
+    }
   }
 }

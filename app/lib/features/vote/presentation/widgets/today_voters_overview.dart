@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
 
 class TodayVotersOverview extends StatelessWidget {
-  final String? resultHour;
+  final int? resultMin;
   final int activePeople;
   const TodayVotersOverview({
     super.key,
-    this.resultHour,
+    this.resultMin,
     required this.activePeople,
   });
 
@@ -27,9 +27,11 @@ class TodayVotersOverview extends StatelessWidget {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
-            if (resultHour != null)
+            if (resultMin != null && resultMin! > 0)
               Text(
-                'Result in ${resultHour} hours',
+                resultMin! > 60
+                    ? 'Result in ${(resultMin! / 60).floor()} hours'
+                    : 'Result in ${resultMin} minutes',
                 style: TextStyle(color: Colors.grey[600], fontSize: 14),
               ),
           ],

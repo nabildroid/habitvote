@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
-import 'package:habitvote/features/onboarding/presentration/widgets/brilliant_ok_button.dart';
+import 'package:habitvote/shared/widgets/brilliant_ok_button.dart';
 import 'dart:ui';
 
 import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:habitvote/features/onboarding/presentration/screens/onboarding_screen.dart';
-import 'package:habitvote/features/onboarding/presentration/widgets/brilliant_ok_button.dart';
+import 'package:habitvote/shared/widgets/brilliant_ok_button.dart';
 
 class AdsScreen extends StatefulWidget {
   const AdsScreen({super.key});

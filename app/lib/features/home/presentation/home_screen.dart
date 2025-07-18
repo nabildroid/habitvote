@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:habitvote/features/habit/application/cubits/habit_tracker_cubit.dart';
-import 'package:habitvote/features/habit/presentations/widgets/checkin.dart';
+import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
+import 'package:habitvote/features/home/presentation/widgets/checkin.dart';
 import 'package:habitvote/features/habit/presentations/widgets/streak_view.dart';
 import 'package:habitvote/features/home/presentation/widgets/custom_app_bar.dart';
 import 'package:habitvote/features/vote/presentation/widgets/today_voters_overview.dart';
@@ -41,10 +42,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 15),
                       Gradientdevider(),
                       const SizedBox(height: 30),
-                      TodayVotersOverview(
-                        activePeople: 100,
-                        resultHour: "2",
-                      ),
+                      StreamBuilder(
+                          stream: context.habitCubit.durationToOpenWindow,
+                          builder: (ctx, s) => TodayVotersOverview(
+                                activePeople: 100,
+                                resultMin: s.data?.inMinutes ?? 0,
+                              )),
                       const SizedBox(height: 20),
                       Container(
                         height: 100,

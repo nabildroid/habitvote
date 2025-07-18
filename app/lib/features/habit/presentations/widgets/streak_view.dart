@@ -18,12 +18,15 @@ class StreakView extends StatelessWidget {
       return DateTime(date.year, date.month, date.day);
     });
 
-    final streakData = last20Days.map((date) {
-      return streak.any((streakDate) =>
-          streakDate.year == date.year &&
-          streakDate.month == date.month &&
-          streakDate.day == date.day);
-    }).toList();
+    final streakData = last20Days
+        .map((date) {
+          return streak.any((streakDate) =>
+              streakDate.year == date.year &&
+              streakDate.month == date.month &&
+              streakDate.day == date.day);
+        })
+        .toList()
+        .reversed;
 
     return Wrap(
         spacing: 8,

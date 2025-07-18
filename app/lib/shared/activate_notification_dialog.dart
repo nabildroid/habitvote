@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:habitvote/core/locator.dart';
-import 'package:habitvote/features/onboarding/presentration/widgets/brilliant_ok_button.dart';
+import 'package:habitvote/shared/widgets/brilliant_ok_button.dart';
 import 'package:habitvote/services/notification_service.dart';
 
 /// Shows a dialog asking the user to activate notifications.

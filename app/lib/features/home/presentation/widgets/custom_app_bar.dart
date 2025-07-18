@@ -11,6 +11,7 @@ class CustomAppBar extends AppBar {
             icon: const Icon(Icons.menu, color: Colors.black),
             onPressed: () {},
           ),
+          titleSpacing: 0,
           title: Builder(builder: (context) {
             return RichText(
               text: TextSpan(

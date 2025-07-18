@@ -9,7 +9,7 @@ import 'package:habitvote/features/onboarding/application/cubits/onboarding_cubi
 import 'package:habitvote/features/user/data/auth_service.dart';
 import 'package:habitvote/features/user/utils/onboarding_signup_extension.dart';
 
-import '../../../onboarding/presentration/widgets/brilliant_ok_button.dart';
+import '../../../../shared/widgets/brilliant_ok_button.dart';
 
 class CreateAccountSlide extends StatelessWidget {
   const CreateAccountSlide({super.key});
