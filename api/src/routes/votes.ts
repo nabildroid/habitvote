@@ -1,64 +1,13 @@
 import { Hono } from "hono";
-import { redis } from "../repositories/upstash";
 import { Firebase } from "../repositories/firebase";
-import type { IHabit } from "../db/types";
 import { generateVoteId } from "../utils";
 import Admin from "firebase-admin";
 import { getNotificationTokens } from "../repositories/notifications";
 
 const VotesRoute = new Hono();
 
-async function getCandidates() {
-    // SCAN 0 MATCH available:*
-    const data = await redis(`SCAN/0/MATCH/available:*`);
-
-    if (data.length === 0) return [];
-
-    const available = data[1].map((item: string) => {
-        const parts = item.split(":");
-        return parts[1];
-    });
-
-    return available;
-}
 
 
-
-VotesRoute.post("attend", async (c) => {
-    if (!c.var.jwtPayload.uid) return c.json({ error: "Unauthorized" }, { status: 401 });
-    const uid = c.var.jwtPayload.uid;
-
-    const now = Date.now();
-    const expires = 3600 * 24 * 7;
-
-    await redis(`SET/available:${uid}/${now}/EX/${expires}`);
-    return c.json({ success: true });
-});
-
-
-VotesRoute.post("/:voteId/activate", async (c) => {
-
-    if (!c.var.jwtPayload.uid) return c.json({ error: "Unauthorized" }, { status: 401 });
-    const uid = c.var.jwtPayload.uid;
-    const voteId = c.req.param("voteId");
-
-    if (!voteId) return c.json({ error: "Vote ID is required" }, { status: 400 });
-
-    const voteRef = Firebase.firestore().collection("users").doc(uid).collection("votes").doc(voteId);
-
-    try {
-        await voteRef.update({
-            isActivated: true,
-            lastUpdate: new Date()
-        });
-
-        return c.json({ success: true });
-    } catch (error) {
-        console.error("Error activating vote:", error);
-        return c.json({ error: "Failed to activate vote" }, { status: 500 });
-    }
-
-});
 
 
 
@@ -73,8 +22,7 @@ VotesRoute.get("/", async (c) => {
         return {
             ...vote,
             id: doc.id,
-            openDate: vote.openDate.toDate(),
-            endDate: vote.endDate.toDate(),
+            createdAt: vote.createdAt.toDate(),
             lastUpdate: vote.lastUpdate.toDate(),
         };
     });
@@ -88,9 +36,62 @@ VotesRoute.get("/", async (c) => {
 VotesRoute.get("candidates", async (c) => {
     if (!c.var.jwtPayload.uid) return c.json({ error: "Unauthorized" }, { status: 401 });
 
-    const available = await getCandidates();
-    available.sort(() => Math.random() - 0.5);
-    return c.json({ available: available.slice(0, 3) });
+    const dummyData = [
+        {
+            id: "user-alice-123",
+            habitId: "habit-read-book-456",
+            habitName: "Read 10 pages daily",
+            checkins: Array.from({ length: 8 }).map((_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                return Math.random() < 0.5 ? date : null;
+            }).filter(d => d !== null) as Date[],
+        },
+        {
+            id: "user-bob-789",
+            habitId: "habit-morning-jog-012",
+            habitName: "Morning jog for 15 minutes",
+            checkins: Array.from({ length: 8 }).map((_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                return Math.random() < 0.5 ? date : null;
+            }).filter(d => d !== null) as Date[],
+        },
+        {
+            id: "user-charlie-345",
+            habitId: "habit-drink-water-678",
+            habitName: "Drink 8 glasses of water",
+            checkins: Array.from({ length: 8 }).map((_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                return Math.random() < 0.5 ? date : null;
+            }).filter(d => d !== null) as Date[],
+        },
+        {
+            id: "user-diana-901",
+            habitId: "habit-meditate-234",
+            habitName: "Meditate for 5 minutes",
+            checkins: Array.from({ length: 8 }).map((_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                return Math.random() < 0.5 ? date : null;
+            }).filter(d => d !== null) as Date[],
+        },
+        {
+            id: "user-ethan-567",
+            habitId: "habit-no-sugar-890",
+            habitName: "No sugar after 8 PM",
+            checkins: Array.from({ length: 8 }).map((_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                return Math.random() < 0.5 ? date : null;
+            }).filter(d => d !== null) as Date[],
+        }
+    ]
+
+
+
+    return c.json({ available: dummyData });
 });
 
 
@@ -176,32 +177,9 @@ VotesRoute.post("/on/:candidatId/:habitId", async (c) => {
     return c.json({ success: true });
 });
 
-VotesRoute.get("/on/bot", async (c) => {
-    // if (!c.var.jwtPayload.admin) return c.json({ error: "Unauthorized" }, { status: 401 });
-
-    const available = await getCandidates();
-
-    const ratio = 1//0.3;
 
 
-    for (const uid of available) {
-        if (Math.random() > ratio) continue;
-        const habits = await Firebase.firestore().collection("users").doc(uid).collection("habits").get();
-        const data = habits.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as IHabit[];
 
-        const habit = data.find(e => e.isActive);
-        if (!habit) continue;
-
-        const decision = Math.random() > 0.5 ? "up" : "down";
-        await VoteOn({
-            userId: uid,
-            habitId: habit.id,
-            decision: decision
-        });
-    }
-
-    return c.json({ success: true });
-});
 
 
 

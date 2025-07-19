@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:habitvote/core/locator.dart';
+import 'package:habitvote/features/vote/application/votes_cubit.dart';
 import 'dart:math';
 
 import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
 import 'package:habitvote/services/kv_service.dart';
 
 class _VoteCandidate {
+  final String id;
   final String title;
   final int reputation;
   final List<bool> streak;
 
   _VoteCandidate({
+    required this.id,
     required this.title,
     required this.reputation,
     required this.streak,
@@ -21,6 +25,8 @@ class CondidatsVoting extends StatefulWidget {
   const CondidatsVoting({super.key});
 
   static show(BuildContext context) {
+    context.voteCubit.fetchCandidats();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -30,7 +36,22 @@ class CondidatsVoting extends StatefulWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
-        return const CondidatsVoting();
+        return BlocBuilder<VotesCubit, VotesState>(
+            buildWhen: (s, n) => s.todayCandidats != n.todayCandidats,
+            builder: (context, s) {
+              return AnimatedSwitcher(
+                duration: Duration(milliseconds: 300),
+                child: s.todayCandidats.isEmpty
+                    ? const FractionallySizedBox(
+                        heightFactor: 0.3,
+                        child: Center(
+                            child: CircularProgressIndicator(
+                          color: Colors.black87,
+                        )),
+                      )
+                    : const CondidatsVoting(),
+              );
+            });
       },
     );
   }
@@ -59,19 +80,29 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
   int _currentPage = 0;
   Offset _dragPosition = Offset.zero;
 
-  final List<_VoteCandidate> _candidates = List.generate(
-    3,
-    (index) => _VoteCandidate(
-      title: 'Write a 400 page each day',
-      reputation: 5,
-      streak: List.generate(35, (index) => Random().nextBool()),
-    ),
-  );
+  late final List<_VoteCandidate> _candidates;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentPage);
+
+    final votingState = context.voteState;
+
+    _candidates = votingState.todayCandidats
+        .where((c) => !votingState.votedOnToday.contains(c.id))
+        .map((c) => _VoteCandidate(
+              id: c.id,
+              title: c.habitName,
+              reputation: 10,
+              streak: List.generate(
+                  30,
+                  (index) => c.checkins.contains(
+                      DateTime.now().subtract(Duration(days: index)))),
+            ))
+        .take(3)
+        .toList();
+    _candidates.shuffle();
 
     checkNeedTutorial();
   }
@@ -135,8 +166,10 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
       // Voted
       if (_dragPosition.dx > 0) {
         debugPrint("Voted Believe on card $_currentPage");
+        voteOnCurrent(true);
       } else {
         debugPrint("Voted Challenge on card $_currentPage");
+        voteOnCurrent(false);
       }
 
       if (_currentPage < _candidates.length - 1) {
@@ -159,6 +192,14 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
     setState(() {
       _dragPosition = Offset.zero;
     });
+  }
+
+  void voteOnCurrent(bool positive) {
+    final candidateId = _candidates[_currentPage].id;
+    final target = context.voteCubit.state.todayCandidats
+        .firstWhere((c) => c.id == candidateId);
+
+    context.voteCubit.voteOn(target, positive);
   }
 
   @override

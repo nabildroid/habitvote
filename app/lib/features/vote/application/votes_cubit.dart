@@ -11,6 +11,7 @@ import 'package:habitvote/features/vote/data/models/candidat_model.dart';
 import 'package:habitvote/features/vote/data/models/vote_model.dart';
 import 'package:habitvote/features/vote/data/repositories/votes_repository.dart';
 import 'package:habitvote/shared/dates_utils.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:rxdart/rxdart.dart';
 
 class VotesState extends Equatable {
@@ -18,12 +19,15 @@ class VotesState extends Equatable {
 
   final List<CandidatModel> todayCandidats;
 
+  final List<String> votedOnToday;
+
   final bool showTodayResults;
 
   VotesState({
     required this.votes,
     required this.todayCandidats,
     required this.showTodayResults,
+    required this.votedOnToday,
   });
 
   VoteModel? get today {
@@ -44,6 +48,7 @@ class VotesState extends Equatable {
   factory VotesState.initial() {
     return VotesState(
       votes: [],
+      votedOnToday: [],
       showTodayResults: false,
       todayCandidats: [],
     );
@@ -54,19 +59,22 @@ class VotesState extends Equatable {
     List<VoteModel>? votes,
     List<CandidatModel>? todayCandidats,
     bool? showTodayResults,
+    List<String>? votedOnToday,
   }) {
     return VotesState(
       votes: votes ?? this.votes,
       todayCandidats: todayCandidats ?? this.todayCandidats,
       showTodayResults: showTodayResults ?? this.showTodayResults,
+      votedOnToday: votedOnToday ?? this.votedOnToday,
     );
   }
 
   @override
-  List<Object?> get props => [votes, todayCandidats, showTodayResults];
+  List<Object?> get props =>
+      [votes, todayCandidats, showTodayResults, votedOnToday];
 }
 
-class VotesCubit extends Cubit<VotesState> {
+class VotesCubit extends HydratedCubit<VotesState> {
   final VotesRepo repo = locator.get();
 
   VotesCubit() : super(VotesState.initial());
@@ -93,46 +101,21 @@ class VotesCubit extends Cubit<VotesState> {
     final candidats =
         await locator.get<VotesRepo>().remote.getAvailableCandidats();
 
-    final habitsFutures = candidats.map((c) async {
-      return MapEntry(
-        c,
-        await locator.get<HabitRepo>().remote.getCandidateHabits(c),
-      );
-    }).toList();
-
-    final habits = await Future.wait(habitsFutures);
-
-    final habitPerUser = habits.map((e) {
-      final habit = e.value.firstOrNull;
-      if (habit != null) {
-        return MapEntry(
-          e.key,
-          habit,
-        );
-      }
-      return null;
-    }).where((e) => e != null);
-
-    final candidatModels = await Future.wait(habitPerUser.map((e) async {
-      final checkins = await locator
-          .get<TrackerRepo>()
-          .remote
-          .getCandidateCheckins(canditateId: e!.key, habitId: e.value.id);
-
-      return CandidatModel(checkins: checkins, habit: e.value, id: e.key);
-    }));
-
     emit(state.copyWith(
-      todayCandidats: candidatModels,
+      todayCandidats: candidats,
     ));
   }
 
   voteOn(CandidatModel candidat, bool positive) async {
     await repo.remote.voteOn(
       candidatId: candidat.id,
-      habitId: candidat.habit.id,
+      habitId: candidat.habitId,
       positive: positive,
     );
+
+    emit(state.copyWith(
+      votedOnToday: [...state.votedOnToday, candidat.id],
+    ));
   }
 
   showVoteResults() async {
@@ -140,6 +123,21 @@ class VotesCubit extends Cubit<VotesState> {
     emit(state.copyWith(
       showTodayResults: true,
     ));
+  }
+
+  @override
+  VotesState? fromJson(Map<String, dynamic> json) {
+    final todayString = DateTime.now().toIso8601String().split('T').first;
+
+    return VotesState.initial().copyWith(
+      votedOnToday: List<String>.from(json['votedOn_$todayString'] ?? []),
+    );
+  }
+
+  @override
+  Map<String, dynamic>? toJson(VotesState state) {
+    final todayString = DateTime.now().toIso8601String().split('T').first;
+    return {"votedOn_$todayString": state.votedOnToday};
   }
 }
 

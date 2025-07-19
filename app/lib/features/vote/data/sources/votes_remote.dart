@@ -2,6 +2,7 @@ import 'package:habitvote/core/locator.dart';
 import 'package:habitvote/core/network/authorized_dio.dart';
 import 'package:habitvote/features/habit/data/models/habit_model.dart';
 import 'package:habitvote/features/user/data/auth_service.dart';
+import 'package:habitvote/features/vote/data/models/candidat_model.dart';
 import 'package:habitvote/features/vote/data/models/vote_model.dart';
 
 class VotesRemote extends AuthorizedDio {
@@ -24,10 +25,12 @@ class VotesRemote extends AuthorizedDio {
     return all.where((e) => e.habitId == habitId).toList();
   }
 
-  Future<List<String>> getAvailableCandidats() async {
+  Future<List<CandidatModel>> getAvailableCandidats() async {
     final response = await (await http).get("/votes/candidates");
 
-    final data = List<String>.from(response.data["available"]);
+    final data = List.from(response.data["available"])
+        .map((e) => CandidatModel.fromJson(e))
+        .toList();
 
     return data;
   }

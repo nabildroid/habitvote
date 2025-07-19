@@ -1,20 +1,31 @@
 import 'package:equatable/equatable.dart';
-import 'package:habitvote/features/habit/data/models/checkin_model.dart';
-import 'package:habitvote/features/habit/data/models/habit_model.dart';
 
 class CandidatModel extends Equatable {
   final String id;
 
-  final HabitModel habit;
+  final String habitId;
+  final String habitName;
 
-  final List<CheckinModel> checkins;
+  final List<DateTime> checkins;
 
   const CandidatModel({
     required this.id,
-    required this.habit,
+    required this.habitId,
+    required this.habitName,
     required this.checkins,
   });
 
   @override
-  List<Object?> get props => [id, habit.id, checkins.length];
+  List<Object?> get props => [id, habitId, habitName, ...checkins];
+
+  factory CandidatModel.fromJson(Map<String, dynamic> json) {
+    return CandidatModel(
+      id: json['id'],
+      habitId: json['habitId'],
+      habitName: json['habitName'],
+      checkins: (json['checkins'] as List<dynamic>)
+          .map((e) => DateTime.parse(e as String))
+          .toList(),
+    );
+  }
 }

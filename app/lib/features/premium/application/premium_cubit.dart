@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'package:habitvote/core/locator.dart';
 import 'package:habitvote/features/premium/application/utils/payment_gatway_enum.dart';
@@ -144,6 +145,8 @@ class PremiumCubit extends Cubit<PremiumState> {
 
   StreamSubscription? _inAppPurchaseSub;
   void init(UserModel user) async {
+    if (!Platform.isAndroid) return;
+
     userid = user.uid;
     _inAppPurchaseSub?.cancel();
 
@@ -267,6 +270,8 @@ class PremiumCubit extends Cubit<PremiumState> {
 
 extension PremiumCubitExtention on PremiumCubit {
   sync(BuildContext context) async {
+    if (!Platform.isAndroid) return;
+
     final userStream = context
         .read<AuthCubit>()
         .stream
