@@ -16,16 +16,24 @@ VotesRoute.get("/", async (c) => {
     if (!c.var.jwtPayload.uid) return c.json({ error: "Unauthorized" }, { status: 401 });
     const uid = c.var.jwtPayload.uid;
 
-    const votes = await Firebase.firestore().collection("users").doc(uid).collection("votes").get();
-    const data = votes.docs.map((doc) => {
-        const vote = doc.data();
-        return {
-            ...vote,
-            id: doc.id,
-            createdAt: vote.createdAt.toDate(),
-            lastUpdate: vote.lastUpdate.toDate(),
-        };
-    });
+    const today = new Date().toISOString().split("T")[0];
+
+    const votes = await Firebase.firestore().collection("users").doc(uid).collection("votes").doc(today).get();
+
+    if (!votes.exists) {
+        return c.json({ error: "No votes found for today" }, { status: 404 });
+    }
+
+    const data = votes.data();
+    if (!data) {
+        return c.json({ error: "No data found" }, { status: 404 });
+    }
+
+    data.id = votes.id; // Add the document ID to the response
+    data.createdAt = data.createdAt.toDate();
+    data.lastUpdate = data.lastUpdate.toDate();
+
+
 
     return c.json(data);
 });

@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:habitvote/core/locator.dart';
 import 'package:habitvote/features/habit/application/cubits/habit_tracker_cubit.dart';
-import 'package:habitvote/features/habit/data/repositories/habit_repository.dart';
-import 'package:habitvote/features/habit/data/repositories/tracker_repository.dart';
 import 'package:habitvote/features/vote/data/models/candidat_model.dart';
 import 'package:habitvote/features/vote/data/models/vote_model.dart';
 import 'package:habitvote/features/vote/data/repositories/votes_repository.dart';
@@ -15,39 +13,22 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:rxdart/rxdart.dart';
 
 class VotesState extends Equatable {
-  final List<VoteModel> votes;
-
   final List<CandidatModel> todayCandidats;
 
   final List<String> votedOnToday;
 
+  final VoteModel? today;
   final bool showTodayResults;
 
   VotesState({
-    required this.votes,
     required this.todayCandidats,
     required this.showTodayResults,
     required this.votedOnToday,
+    this.today,
   });
-
-  VoteModel? get today {
-    return votes
-        .where(
-            (v) => v.createdAt.diffDay(DateTime.now()) <= Duration(hours: 24))
-        .firstOrNull;
-  }
-
-  VoteModel? get yesterday {
-    return votes
-        .where((v) =>
-            v.createdAt.diffDay(DateTime.now()) <= Duration(hours: 48) &&
-            v.createdAt.diffDay(DateTime.now()) > Duration(hours: 24))
-        .firstOrNull;
-  }
 
   factory VotesState.initial() {
     return VotesState(
-      votes: [],
       votedOnToday: [],
       showTodayResults: false,
       todayCandidats: [],
@@ -56,22 +37,22 @@ class VotesState extends Equatable {
 
   // copyWith method to create a new instance of VotesState with updated values
   VotesState copyWith({
-    List<VoteModel>? votes,
     List<CandidatModel>? todayCandidats,
     bool? showTodayResults,
     List<String>? votedOnToday,
+    VoteModel? today,
   }) {
     return VotesState(
-      votes: votes ?? this.votes,
       todayCandidats: todayCandidats ?? this.todayCandidats,
       showTodayResults: showTodayResults ?? this.showTodayResults,
       votedOnToday: votedOnToday ?? this.votedOnToday,
+      today: today ?? this.today,
     );
   }
 
   @override
   List<Object?> get props =>
-      [votes, todayCandidats, showTodayResults, votedOnToday];
+      [today, todayCandidats, showTodayResults, votedOnToday];
 }
 
 class VotesCubit extends HydratedCubit<VotesState> {
@@ -85,8 +66,8 @@ class VotesCubit extends HydratedCubit<VotesState> {
     ));
   }
 
-  load(List<VoteModel> votes) {
-    emit(state.copyWith(votes: votes));
+  load(VoteModel vote) async {
+    emit(state.copyWith(today: vote));
   }
 
   final _listeners = CompositeSubscription();
@@ -151,10 +132,10 @@ extension SyncWithHabit on VotesCubit {
         .whereNotNull();
 
     _listeners.add(habitStream.listen((habit) async {
-      final votes = await repo.getVotesByHabitId(habit.id);
+      final vote = await repo.getTodayVoteByHabitId(habit.id);
 
-      if (votes.isNotEmpty) {
-        load(votes);
+      if (vote != null) {
+        load(vote);
       }
     }));
   }

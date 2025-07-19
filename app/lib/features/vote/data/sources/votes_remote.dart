@@ -10,19 +10,15 @@ class VotesRemote extends AuthorizedDio {
     locator.get<AuthService>().subscribeToToken(this);
   }
 
-  Future<void> attendVoting() async {
-    await (await http).post("/votes/attend");
-  }
+  Future<VoteModel?> get() async {
+    try {
+      final response = await (await http).get("/votes");
+      if (response.data == null) return null;
 
-  Future<List<VoteModel>> getAll() async {
-    final response = await (await http).get("/votes");
-    final data = List.from(response.data);
-    return data.map((e) => VoteModel.fromJson(e)).toList();
-  }
-
-  Future<List<VoteModel>> getByHabitId(String habitId) async {
-    final all = await getAll();
-    return all.where((e) => e.habitId == habitId).toList();
+      return VoteModel.fromJson(response.data);
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<List<CandidatModel>> getAvailableCandidats() async {
@@ -45,12 +41,6 @@ class VotesRemote extends AuthorizedDio {
       data: {
         "decision": positive ? "up" : "down",
       },
-    );
-  }
-
-  Future<void> activate(String voteId) async {
-    final response = await (await http).post(
-      "/votes/$voteId/activate",
     );
   }
 }

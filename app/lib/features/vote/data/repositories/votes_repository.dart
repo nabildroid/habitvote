@@ -9,17 +9,17 @@ class VotesRepo {
 
   VotesRepo({required this.cache, required this.remote});
 
-  Future<List<VoteModel>> getVotesByHabitId(String habitId) async {
+  Future<VoteModel?> getTodayVoteByHabitId(String habitId) async {
     if (isOnline.value) {
-      final remoteVotes = await remote.getByHabitId(habitId);
-      await cache.clear();
-      for (final record in remoteVotes) {
-        await cache.put(record);
+      final remoteVote = await remote.get();
+
+      if (remoteVote != null) {
+        await cache.put(remoteVote);
       }
 
-      return remoteVotes;
+      return remoteVote;
     }
 
-    return await cache.getByHabitId(habitId);
+    return await cache.getToday();
   }
 }

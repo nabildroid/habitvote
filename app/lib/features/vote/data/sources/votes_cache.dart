@@ -26,12 +26,15 @@ class VotesCache {
     return records.map((record) => VoteModel.fromJson(record.value)).toList();
   }
 
-  Future<List<VoteModel>> getByHabitId(String habitId) async {
-    final finder = Finder(
-      filter: Filter.equals('habitId', habitId),
-    );
-    final records = await _votes.find(_db, finder: finder);
-    return records.map((record) => VoteModel.fromJson(record.value)).toList();
+  Future<VoteModel?> getToday() async {
+    return getAll().then((votes) {
+      final todayString = DateTime.now().toIso8601String().split('T').first;
+      return votes
+          .where(
+            (vote) => vote.id == todayString,
+          )
+          .firstOrNull;
+    });
   }
 
   Future<void> openToday() async {
