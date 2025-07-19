@@ -174,6 +174,8 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
               children: [
                 _buildSideIndicators(),
                 PageView.builder(
+                  allowImplicitScrolling: false,
+                  physics: NeverScrollableScrollPhysics(),
                   controller: _pageController,
                   itemCount: _candidates.length,
                   onPageChanged: (page) {
