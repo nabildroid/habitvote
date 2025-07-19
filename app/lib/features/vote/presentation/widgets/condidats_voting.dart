@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:habitvote/core/locator.dart';
 import 'dart:math';
 
 import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
+import 'package:habitvote/services/kv_service.dart';
 
 class _VoteCandidate {
   final String title;
@@ -33,6 +35,21 @@ class CondidatsVoting extends StatefulWidget {
     );
   }
 
+  static Future<bool> _needTutorial() async {
+    final maxView = 2;
+    final currentView =
+        (await locator.get<KvService>().getInt('vote_drag_tutorial')) ?? 0;
+
+    if (currentView >= maxView) {
+      return false;
+    }
+
+    await locator
+        .get<KvService>()
+        .setInt('vote_drag_tutorial', currentView + 1);
+    return true;
+  }
+
   @override
   State<CondidatsVoting> createState() => _CondidatsVotingState();
 }
@@ -55,10 +72,19 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentPage);
+
+    checkNeedTutorial();
+  }
+
+  void checkNeedTutorial() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _shouldShowDragTutorial()) {
-        _runDragTutorial();
-      }
+      if (!mounted) return;
+
+      CondidatsVoting._needTutorial().then((needTutorial) {
+        if (needTutorial && mounted) {
+          _runDragTutorial();
+        }
+      });
     });
   }
 
@@ -66,11 +92,6 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
-  }
-
-  bool _shouldShowDragTutorial() {
-    // For now, always show it.
-    return true;
   }
 
   void _runDragTutorial() async {

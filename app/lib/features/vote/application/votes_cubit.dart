@@ -72,8 +72,6 @@ class VotesCubit extends Cubit<VotesState> {
   VotesCubit() : super(VotesState.initial());
 
   init() async {
-    unawaited(repo.remote.attendVoting());
-
     emit(state.copyWith(
       showTodayResults: await repo.cache.isTodayOpen(),
     ));

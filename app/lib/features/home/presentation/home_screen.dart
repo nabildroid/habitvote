@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:habitvote/features/habit/application/cubits/habit_tracker_cubit.dart';
 import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
+import 'package:habitvote/features/home/presentation/menu_drawer.dart';
 import 'package:habitvote/features/home/presentation/widgets/checkin.dart';
 import 'package:habitvote/features/habit/presentations/widgets/streak_view.dart';
 import 'package:habitvote/features/home/presentation/widgets/custom_app_bar.dart';
@@ -21,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(),
+      drawer: const MenuDrawer(),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -30,13 +32,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const SizedBox(height: 20),
-                      Text(
-                        context.read<HabitTrackerCubit>().state.habit?.name ??
-                            'Welcome to HabitVote',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 28, fontWeight: FontWeight.bold),
-                      ),
+                      Builder(builder: (ctx) {
+                        return Text(
+                          ctx.watch<HabitTrackerCubit>().state.habit?.name ??
+                              'Welcome to HabitVote',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 28, fontWeight: FontWeight.bold),
+                        );
+                      }),
                       const SizedBox(height: 30),
                       StreakView(),
                       const SizedBox(height: 15),

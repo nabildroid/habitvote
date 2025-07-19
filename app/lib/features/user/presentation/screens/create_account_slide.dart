@@ -47,9 +47,12 @@ class CreateAccountSlide extends StatelessWidget {
             BrilliantOkButton(
               tag: "Guesst",
               onPressed: () async {
-                context.go("/home");
-
                 await locator.get<AuthService>().anonymousLogin();
+
+                await context.read<OnboardingCubit>().registerHabit();
+
+                await context.read<HabitTrackerCubit>().init(fresh: true);
+                context.go("/home");
               },
               text: "Guest Sign in",
             ),
