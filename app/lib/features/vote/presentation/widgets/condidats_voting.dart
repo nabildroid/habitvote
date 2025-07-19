@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
+import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
+
 class _VoteCandidate {
   final String title;
   final int reputation;
@@ -88,7 +90,7 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
       _dragPosition = const Offset(-60, 0);
     });
 
-// Hold the position
+    // Hold the position
     await Future.delayed(const Duration(milliseconds: 700));
     if (!mounted) return;
 
@@ -125,6 +127,7 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
         // Last card, close the sheet
         if (mounted) {
           Navigator.of(context).pop();
+          context.voteCubit.showVoteResults();
         }
       }
     }

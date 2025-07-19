@@ -38,7 +38,7 @@ class _CandidatsVotingBottomSheetState
   }
 
   finish() {
-    context.voteCubit.activateTodayVotes();
+    context.voteCubit.showVoteResults();
     Navigator.of(context).pop();
   }
 

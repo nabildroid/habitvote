@@ -30,7 +30,7 @@ class HabitModel extends Equatable {
     required this.description,
     required this.isNegative,
     required this.publicName,
-    this.checkinOpenWindow = const TimeOfDay(hour: 22, minute: 35),
+    this.checkinOpenWindow = const TimeOfDay(hour: 08, minute: 35),
     this.checkinCloseWindow = const TimeOfDay(hour: 23, minute: 0),
     DateTime? createdAt,
   }) : id = id ?? const Uuid().v4();

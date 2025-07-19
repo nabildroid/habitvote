@@ -5,6 +5,7 @@ import 'package:habitvote/core/locator.dart';
 class VotesCache {
   final Database _db = locator.get();
   final _votes = stringMapStoreFactory.store("votes");
+  final _openVotes = stringMapStoreFactory.store("openVotes");
 
   Future<void> put(VoteModel vote) async {
     await _votes.record(vote.id).put(_db, vote.toJson());
@@ -31,6 +32,16 @@ class VotesCache {
     );
     final records = await _votes.find(_db, finder: finder);
     return records.map((record) => VoteModel.fromJson(record.value)).toList();
+  }
+
+  Future<void> openToday() async {
+    final todayString = DateTime.now().toIso8601String().split('T').first;
+    await _openVotes.record(todayString).put(_db, {});
+  }
+
+  Future<bool> isTodayOpen() async {
+    final todayString = DateTime.now().toIso8601String().split('T').first;
+    return await _openVotes.record(todayString).exists(_db);
   }
 
   Future<void> clear() async {

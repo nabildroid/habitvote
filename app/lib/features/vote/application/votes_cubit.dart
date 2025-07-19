@@ -18,9 +18,12 @@ class VotesState extends Equatable {
 
   final List<CandidatModel> todayCandidats;
 
+  final bool showTodayResults;
+
   VotesState({
     required this.votes,
     required this.todayCandidats,
+    required this.showTodayResults,
   });
 
   VoteModel? get today {
@@ -41,6 +44,7 @@ class VotesState extends Equatable {
   factory VotesState.initial() {
     return VotesState(
       votes: [],
+      showTodayResults: false,
       todayCandidats: [],
     );
   }
@@ -49,15 +53,17 @@ class VotesState extends Equatable {
   VotesState copyWith({
     List<VoteModel>? votes,
     List<CandidatModel>? todayCandidats,
+    bool? showTodayResults,
   }) {
     return VotesState(
       votes: votes ?? this.votes,
       todayCandidats: todayCandidats ?? this.todayCandidats,
+      showTodayResults: showTodayResults ?? this.showTodayResults,
     );
   }
 
   @override
-  List<Object?> get props => [votes, todayCandidats];
+  List<Object?> get props => [votes, todayCandidats, showTodayResults];
 }
 
 class VotesCubit extends Cubit<VotesState> {
@@ -67,6 +73,10 @@ class VotesCubit extends Cubit<VotesState> {
 
   init() async {
     unawaited(repo.remote.attendVoting());
+
+    emit(state.copyWith(
+      showTodayResults: await repo.cache.isTodayOpen(),
+    ));
   }
 
   load(List<VoteModel> votes) {
@@ -127,20 +137,11 @@ class VotesCubit extends Cubit<VotesState> {
     );
   }
 
-  activateTodayVotes() async {
-    print("activing todays vote");
-
-    // final vote = state.today;
-    // if (vote != null) {
-    //   final updatedVotes = state.votes
-    //       .map((v) => v.id == vote.id ? vote.activate() : v)
-    //       .toList();
-
-    //   emit(state.copyWith(votes: updatedVotes));
-
-    //   await repo.remote.activate(vote.id);
-    //   await repo.cache.put(vote.activate());
-    // }
+  showVoteResults() async {
+    await repo.cache.openToday();
+    emit(state.copyWith(
+      showTodayResults: true,
+    ));
   }
 }
 

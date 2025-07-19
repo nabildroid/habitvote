@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
 
 class VoterResults extends StatelessWidget {
   final bool blur;
@@ -11,6 +12,8 @@ class VoterResults extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watchVoteState;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,7 +30,7 @@ class VoterResults extends StatelessWidget {
                 inner: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
               ),
               child: Text(
-                "15",
+                "${state.today?.up ?? 0}".padLeft(2, '0'),
                 style: const TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
@@ -41,7 +44,7 @@ class VoterResults extends StatelessWidget {
             ),
           ],
         ),
-        Text("30 Votes"),
+        Text("${state.today?.total ?? 0} Votes"),
         Column(
           children: [
             ImageFiltered(
@@ -54,7 +57,7 @@ class VoterResults extends StatelessWidget {
                 inner: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
               ),
               child: Text(
-                "15",
+                "${state.today?.down ?? 0}".padLeft(2, '0'),
                 style: const TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.bold,

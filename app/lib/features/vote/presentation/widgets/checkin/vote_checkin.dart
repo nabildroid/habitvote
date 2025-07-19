@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
 import 'package:habitvote/features/vote/presentation/widgets/checkin/voter_results.dart';
 import 'package:habitvote/features/vote/presentation/widgets/condidats_voting.dart';
 import 'package:habitvote/shared/widgets/brilliant_ok_button.dart';
@@ -9,9 +10,10 @@ class VoteCheckin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watchVoteState;
     return AnimatedSwitcher(
       duration: Duration(milliseconds: 300),
-      child: true ? ViewVotingResult() : VoteOnPeople(),
+      child: state.showTodayResults ? ViewVotingResult() : VoteOnPeople(),
     );
   }
 }

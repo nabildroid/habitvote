@@ -39,9 +39,17 @@ class TodayVotersOverview extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildVoteItem('believe on you', 10),
+            _buildVoteItem(
+              'believe on you',
+              state.today?.up ?? 0,
+              blur: !state.showTodayResults,
+            ),
             const SizedBox(height: 4),
-            _buildVoteItem('Challenge you', 10),
+            _buildVoteItem(
+              'Challenge you',
+              state.today?.down ?? 0,
+              blur: !state.showTodayResults,
+            ),
             const SizedBox(height: 4),
             _buildVoteItem(
               'Here Today',
@@ -73,7 +81,7 @@ class TodayVotersOverview extends StatelessWidget {
               ),
               inner: ImageFilter.blur(sigmaX: 2, sigmaY: 4)),
           child: Text(
-            value.toString(),
+            value.toString().padLeft(2, "0"),
             style: const TextStyle(
               fontSize: 16,
             ),
