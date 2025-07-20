@@ -13,6 +13,10 @@ export const HabitSchema = z.object({
     isActive: z.boolean().default(true),
     upadatedAt: z.coerce.date().default(new Date()),
 
+    checkinOpenWindow: z.string(),
+    checkinCloseWindow: z.string(),
+    triggers: z.array(z.string()), // array of time strings in "HH:mm" format
+
     isDeleted: z.boolean().optional(),
 })
 

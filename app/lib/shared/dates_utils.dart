@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 List<DateTime> preventDayDuplication(List<DateTime> days) {
   if (days.isEmpty) return [];
 
@@ -30,5 +32,23 @@ extension DayStartAtMid on DateTime {
       return Duration(hours: hours * 24);
     }
     return other.difference(this).abs();
+  }
+}
+
+extension TimeInDayParser on TimeOfDay {
+  // conver it to "hh:mm" and from it to TimeOfDay
+  String toTimeString() {
+    return "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
+  }
+
+  /// Convert TimeOfDay to DateTime at the start of the day
+  static TimeOfDay parseFromString(String time) {
+    final parts = time.split(':');
+    if (parts.length != 2) {
+      throw FormatException("Invalid time format: $time");
+    }
+    final hour = int.parse(parts[0]);
+    final minute = int.parse(parts[1]);
+    return TimeOfDay(hour: hour, minute: minute);
   }
 }

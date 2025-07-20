@@ -2,6 +2,8 @@ import "package:equatable/equatable.dart";
 import "package:flutter/material.dart";
 import "package:uuid/uuid.dart";
 
+import "package:habitvote/shared/dates_utils.dart";
+
 /// Model class representing a habit
 class HabitModel extends Equatable {
   /// Unique identifier for the habit
@@ -23,6 +25,7 @@ class HabitModel extends Equatable {
 
   final TimeOfDay checkinOpenWindow;
   final TimeOfDay checkinCloseWindow;
+  final List<TimeOfDay> triggers;
 
   HabitModel({
     String? id,
@@ -30,8 +33,9 @@ class HabitModel extends Equatable {
     required this.description,
     required this.isNegative,
     required this.publicName,
-    this.checkinOpenWindow = const TimeOfDay(hour: 08, minute: 35),
-    this.checkinCloseWindow = const TimeOfDay(hour: 23, minute: 0),
+    required this.checkinOpenWindow,
+    required this.checkinCloseWindow,
+    required this.triggers,
     DateTime? createdAt,
   }) : id = id ?? const Uuid().v4();
 
@@ -43,6 +47,9 @@ class HabitModel extends Equatable {
       'description': description,
       'isNegative': isNegative,
       'publicName': publicName,
+      'checkinOpenWindow': checkinOpenWindow.toTimeString(),
+      'checkinCloseWindow': checkinCloseWindow.toTimeString(),
+      'triggers': triggers.map((e) => e.toTimeString()).toList(),
     };
   }
 
@@ -54,6 +61,13 @@ class HabitModel extends Equatable {
       name: json['name'],
       description: json['description'],
       isNegative: json['isNegative'],
+      checkinOpenWindow:
+          TimeInDayParser.parseFromString(json['checkinOpenWindow']),
+      checkinCloseWindow:
+          TimeInDayParser.parseFromString(json['checkinCloseWindow']),
+      triggers: (json['triggers'] as List<dynamic>)
+          .map((e) => TimeInDayParser.parseFromString(e as String))
+          .toList(),
     );
   }
 

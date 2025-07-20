@@ -14,6 +14,9 @@ extension OnboardingHabitRegisterExtension on OnboardingCubit {
       isNegative: habitType == "bad",
       name: habitName,
       publicName: habitName,
+      checkinOpenWindow: state.openWindow,
+      checkinCloseWindow: state.closeWindow,
+      triggers: state.triggers,
     );
 
     final repo = locator.get<HabitRepo>();

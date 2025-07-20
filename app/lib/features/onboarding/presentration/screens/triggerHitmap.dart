@@ -30,6 +30,7 @@ class TriggerHeatMap extends StatelessWidget {
           SizedBox(
             height: 400, // Define a height for the heatmap
             child: VerticalTimeHeatmap(
+              // todo use the time windown the user previosily chosen
               selectedTimes: triggers,
               onTimeTap: context.read<OnboardingCubit>().addTrigger,
             ),
