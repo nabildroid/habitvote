@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:habitvote/features/onboarding/presentration/screens/checkinWindowPicker.dart';
+import 'package:habitvote/features/onboarding/presentration/screens/triggerHitmap.dart';
 import 'package:habitvote/features/user/presentation/screens/create_account_slide.dart';
 import 'package:habitvote/features/onboarding/presentration/widgets/habitVoteDifference.dart';
 import 'package:habitvote/shared/widgets/brilliant_ok_button.dart';
@@ -87,16 +89,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               HabitVoteDifference(), // 3 - No input needed
               HabitCategoryChooser(), // 4
               HabitChooser(), // 5
-              AgeGroupSelector(), // 6
-              ThankYouSlide(), // 7 - No input needed
+              AgeGroupSelector(), // 7
+              CheckInWindownPicker(), // 8
+              TriggerHeatMap(), // 9
+              ThankYouSlide(), // 10 - No input needed
               SetupProgressSlide(
                 onComplete: () => controller.nextPage(
                   duration: Duration(milliseconds: 350),
                   curve: Curves.easeInOut,
                 ),
-              ), // 8 - No input needed
-              CustomPlanSlide(), // 9 - No input needed
-              CreateAccountSlide(), // 10 - Leads to registration
+              ), // 11 - No input needed
+              CustomPlanSlide(), // 12 - No input needed
+              CreateAccountSlide(), // 13 - Leads to registration
               // Removed SetupProgressSlide as it seems replaced or unused
             ],
           ),
@@ -152,9 +156,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 28.0),
                       child: BrilliantOkButton(
                         // Text changes on the last slide before registration
-                        text: currentPage == 7
+                        text: currentPage == 9
                             ? "Create my plan"
-                            : currentPage == 9
+                            : currentPage == 10
                                 ? "Let's get started!"
                                 : "Next",
                         tag: "continue",

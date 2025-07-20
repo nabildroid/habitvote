@@ -14,6 +14,10 @@ class OnboardingState extends Equatable {
   final String? habitType; // New property: "good" or "bad"
   final String? selectedHabit; // New property
 
+  final TimeOfDay openWindow;
+  final TimeOfDay closeWindow;
+  final List<TimeOfDay>? triggers;
+
   const OnboardingState({
     this.age,
     this.gender,
@@ -21,6 +25,9 @@ class OnboardingState extends Equatable {
     this.usedOtherApps,
     this.habitType,
     this.selectedHabit,
+    this.openWindow = const TimeOfDay(hour: 19, minute: 0),
+    this.closeWindow = const TimeOfDay(hour: 24, minute: 0),
+    this.triggers,
   });
 
   OnboardingState copyWith({
@@ -30,6 +37,9 @@ class OnboardingState extends Equatable {
     bool? usedOtherApps,
     String? habitType,
     String? selectedHabit,
+    TimeOfDay? openWindow,
+    TimeOfDay? closeWindow,
+    List<TimeOfDay>? triggers,
   }) {
     return OnboardingState(
       age: age ?? this.age,
@@ -38,6 +48,9 @@ class OnboardingState extends Equatable {
       usedOtherApps: usedOtherApps ?? this.usedOtherApps,
       habitType: habitType ?? this.habitType,
       selectedHabit: selectedHabit ?? this.selectedHabit,
+      openWindow: openWindow ?? this.openWindow,
+      closeWindow: closeWindow ?? this.closeWindow,
+      triggers: triggers ?? this.triggers,
     );
   }
 
@@ -49,6 +62,9 @@ class OnboardingState extends Equatable {
         usedOtherApps,
         habitType,
         selectedHabit,
+        openWindow,
+        closeWindow,
+        triggers,
       ];
 }
 
@@ -83,6 +99,20 @@ class OnboardingCubit extends HydratedCubit<OnboardingState> {
     emit(state.copyWith(selectedHabit: habit));
   }
 
+  void setOpenWindow(TimeOfDay? time) {
+    emit(state.copyWith(openWindow: time));
+  }
+
+  void setCloseWindow(TimeOfDay? time) {
+    emit(state.copyWith(closeWindow: time));
+  }
+
+  void addTrigger(TimeOfDay time) {
+    final updatedTriggers = List<TimeOfDay>.from(state.triggers ?? []);
+    updatedTriggers.add(time);
+    emit(state.copyWith(triggers: updatedTriggers));
+  }
+
   @override
   void onChange(Change<OnboardingState> change) {
     super.onChange(change);
@@ -97,6 +127,21 @@ class OnboardingCubit extends HydratedCubit<OnboardingState> {
       usedOtherApps: json["usedOtherApps"],
       habitType: json["habitType"],
       selectedHabit: json["selectedHabit"],
+      openWindow: TimeOfDay(
+        hour: json["openWindow"]["hour"],
+        minute: json["openWindow"]["minute"],
+      ),
+      closeWindow: TimeOfDay(
+        hour: json["closeWindow"]["hour"],
+        minute: json["closeWindow"]["minute"],
+      ),
+      triggers: (json["triggers"] as List?)
+              ?.map((e) => TimeOfDay(
+                    hour: e["hour"],
+                    minute: e["minute"],
+                  ))
+              .toList() ??
+          [],
     );
   }
 
@@ -109,6 +154,20 @@ class OnboardingCubit extends HydratedCubit<OnboardingState> {
       "usedOtherApps": state.usedOtherApps,
       "habitType": state.habitType,
       "selectedHabit": state.selectedHabit,
+      "openWindow": {
+        "hour": state.openWindow.hour,
+        "minute": state.openWindow.minute,
+      },
+      "closeWindow": {
+        "hour": state.closeWindow.hour,
+        "minute": state.closeWindow.minute,
+      },
+      "triggers": state.triggers
+          ?.map((e) => {
+                "hour": e.hour,
+                "minute": e.minute,
+              })
+          .toList(),
     };
   }
 }
