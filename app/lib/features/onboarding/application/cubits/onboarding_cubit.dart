@@ -16,7 +16,7 @@ class OnboardingState extends Equatable {
 
   final TimeOfDay openWindow;
   final TimeOfDay closeWindow;
-  final List<TimeOfDay>? triggers;
+  final List<TimeOfDay> triggers;
 
   const OnboardingState({
     this.age,
@@ -27,7 +27,7 @@ class OnboardingState extends Equatable {
     this.selectedHabit,
     this.openWindow = const TimeOfDay(hour: 19, minute: 0),
     this.closeWindow = const TimeOfDay(hour: 24, minute: 0),
-    this.triggers,
+    this.triggers = const [],
   });
 
   OnboardingState copyWith({
@@ -108,7 +108,8 @@ class OnboardingCubit extends HydratedCubit<OnboardingState> {
   }
 
   void addTrigger(TimeOfDay time) {
-    final updatedTriggers = List<TimeOfDay>.from(state.triggers ?? []);
+    if (state.triggers.contains(time)) return;
+    final updatedTriggers = List<TimeOfDay>.from(state.triggers);
     updatedTriggers.add(time);
     emit(state.copyWith(triggers: updatedTriggers));
   }

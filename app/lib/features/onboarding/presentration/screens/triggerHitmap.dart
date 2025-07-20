@@ -1,28 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:habitvote/features/onboarding/application/cubits/onboarding_cubit.dart';
 import 'package:habitvote/shared/widgets/verticalTimeHeatmap/vertical_time_heatmap.dart';
 
-class TriggerHeatMap extends StatefulWidget {
+class TriggerHeatMap extends StatelessWidget {
   const TriggerHeatMap({super.key});
 
   @override
-  State<TriggerHeatMap> createState() => _TriggerHeatMapState();
-}
-
-class _TriggerHeatMapState extends State<TriggerHeatMap> {
-  List<TimeOfDay> _selectedTimes = [];
-
-  void _addTime(TimeOfDay time) {
-    setState(() {
-      // Avoid adding duplicate times
-      if (!_selectedTimes
-          .any((t) => t.hour == time.hour && t.minute == time.minute)) {
-        _selectedTimes.add(time);
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final triggers = context.watch<OnboardingCubit>().state.triggers;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
@@ -44,14 +30,14 @@ class _TriggerHeatMapState extends State<TriggerHeatMap> {
           SizedBox(
             height: 400, // Define a height for the heatmap
             child: VerticalTimeHeatmap(
-              selectedTimes: _selectedTimes,
-              onTimeTap: _addTime,
+              selectedTimes: triggers,
+              onTimeTap: context.read<OnboardingCubit>().addTrigger,
             ),
           ),
           const SizedBox(height: 20),
           Center(
             child: Text(
-              '${_selectedTimes.length} critical times selected',
+              '${triggers.length} critical times selected',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.black54,
                     fontWeight: FontWeight.w500,

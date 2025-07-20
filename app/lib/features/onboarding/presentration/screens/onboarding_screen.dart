@@ -147,8 +147,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                     // Hide button if controller is not ready
                     if (!controller.hasClients ||
-                        currentPage == 8 ||
-                        currentPage == 10) {
+                        currentPage == 10 ||
+                        currentPage == 12) {
                       return SizedBox.shrink();
                     }
 
@@ -158,7 +158,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         // Text changes on the last slide before registration
                         text: currentPage == 9
                             ? "Create my plan"
-                            : currentPage == 10
+                            : currentPage == 11
                                 ? "Let's get started!"
                                 : "Next",
                         tag: "continue",
