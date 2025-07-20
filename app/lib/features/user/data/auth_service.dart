@@ -11,7 +11,7 @@ import 'package:rxdart/rxdart.dart';
 
 // ignore: constant_identifier_names
 const _BaseURL = kReleaseMode
-    ? "https://vocafusion-auth.pni20156789.workers.dev"
+    ? "https://habitvote-auth.pni20156789.workers.dev"
     : "http://192.168.0.105:8787";
 // ignore: constant_identifier_names
 const _AUTH_HEADER = "x-auth";

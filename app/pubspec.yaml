@@ -82,6 +82,8 @@ dependencies:
   flutter_markdown_latex:
   flutter_math_fork:
   flutter_mosaic: ^0.0.4
+  syncfusion_flutter_maps:
+  countries_world_map:
 
 dev_dependencies:
   flutter_test:
@@ -97,8 +99,8 @@ flutter:
   uses-material-design: true
 
   # # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - assets/ads.png
+  assets:
+    - assets/world_map.json
 
 flutter_launcher_icons:
   android: "ic_launcher"

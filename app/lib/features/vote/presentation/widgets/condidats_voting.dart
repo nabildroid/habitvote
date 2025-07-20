@@ -22,9 +22,16 @@ class _VoteCandidate {
 }
 
 class CondidatsVoting extends StatefulWidget {
-  const CondidatsVoting({super.key});
+  final bool debug;
+  const CondidatsVoting({
+    super.key,
+    this.debug = false,
+  });
 
-  static show(BuildContext context) {
+  static show(
+    BuildContext context, {
+    bool debug = false,
+  }) {
     context.voteCubit.fetchCandidats();
 
     showModalBottomSheet(
@@ -46,10 +53,8 @@ class CondidatsVoting extends StatefulWidget {
                         heightFactor: 0.3,
                         child: Center(
                             child: CircularProgressIndicator(
-                          color: Colors.black87,
-                        )),
-                      )
-                    : const CondidatsVoting(),
+                                color: Colors.black87)))
+                    : CondidatsVoting(debug: debug),
               );
             });
       },
@@ -88,9 +93,10 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
     _pageController = PageController(initialPage: _currentPage);
 
     final votingState = context.voteState;
+    final treatedCandidates = votingState.todayCandidats
+        .where((c) => widget.debug || !votingState.votedOnToday.contains(c.id));
 
-    _candidates = votingState.todayCandidats
-        .where((c) => !votingState.votedOnToday.contains(c.id))
+    _candidates = treatedCandidates
         .map((c) => _VoteCandidate(
               id: c.id,
               title: c.habitName,
@@ -100,7 +106,7 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
                   (index) => c.checkins.contains(
                       DateTime.now().subtract(Duration(days: index)))),
             ))
-        .take(3)
+        .take(widget.debug ? 1000 : 3)
         .toList();
     _candidates.shuffle();
 

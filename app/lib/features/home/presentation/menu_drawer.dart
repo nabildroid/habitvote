@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:habitvote/features/user/application/cubits/auth_cubit.dart';
+import 'package:habitvote/features/vote/presentation/widgets/condidats_voting.dart';
 import 'package:habitvote/shared/widgets/brilliant_ok_button.dart';
 
 class MenuDrawer extends StatelessWidget {
@@ -126,6 +127,15 @@ class MenuDrawer extends StatelessWidget {
                     icon: Icons.help_outline,
                     title: 'Help & Support',
                     onTap: () => Navigator.pop(context),
+                  ),
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.how_to_vote,
+                    title: 'Vote On People',
+                    onTap: () {
+                      Navigator.pop(context);
+                      CondidatsVoting.show(context, debug: true);
+                    },
                   ),
                 ],
               ),

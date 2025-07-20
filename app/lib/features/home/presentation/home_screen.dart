@@ -6,8 +6,10 @@ import 'package:habitvote/features/home/presentation/menu_drawer.dart';
 import 'package:habitvote/features/home/presentation/widgets/checkin.dart';
 import 'package:habitvote/features/habit/presentations/widgets/streak_view.dart';
 import 'package:habitvote/features/home/presentation/widgets/custom_app_bar.dart';
+import 'package:habitvote/features/user/presentation/widget/presence/users_live_map.dart';
 import 'package:habitvote/features/vote/presentation/widgets/today_voters_overview.dart';
 import 'package:habitvote/shared/widgets/gradientDevider.dart';
+import 'package:syncfusion_flutter_maps/maps.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -58,12 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Center(
-                          child: Text(
-                            'Map Placeholder',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ),
+                        child: UsersLiveMap(),
                       ),
                       const SizedBox(height: 20),
                     ])),
