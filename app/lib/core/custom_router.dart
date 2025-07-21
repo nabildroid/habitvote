@@ -15,6 +15,7 @@ import 'package:habitvote/features/onboarding/presentration/screens/onboarding_s
 import 'package:habitvote/features/user/application/cubits/auth_cubit.dart';
 import 'package:habitvote/features/user/data/auth_service.dart';
 import 'package:habitvote/features/user/utils/user_checker.dart';
+import 'package:habitvote/shared/widgets/block_india.dart';
 import 'package:rxdart/transformers.dart';
 
 // import 'package:posthog_flutter/posthog_flutter.dart';
@@ -28,6 +29,9 @@ final GoRouter router = GoRouter(
     // if (Platform.isAndroid) PosthogObserver(),
   ],
   redirect: (BuildContext context, GoRouterState state) async {
+    if (await BlockIndia.check()) {
+      return "/block-india";
+    }
     final isReady = await isUserLoggedIn();
 
     if (state.fullPath == null) return null;
@@ -44,6 +48,10 @@ final GoRouter router = GoRouter(
   },
   initialLocation: "/onboarding",
   routes: [
+    GoRoute(
+      path: "/block-india",
+      builder: (context, state) => const BlockIndia(),
+    ),
     GoRoute(
         path: "/home",
         builder: (context, state) => const HomeScreen(),
