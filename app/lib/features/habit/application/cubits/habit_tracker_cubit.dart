@@ -187,3 +187,35 @@ extension HabitTimerExtension on HabitTrackerCubit {
     }
   }
 }
+
+extension HabitEditingExtension on HabitTrackerCubit {
+  Future<void> updateHabitDetails({String? name, bool? isNegative}) async {
+    if (state.habit == null) return;
+    final updatedHabit = state.habit!.copyWith(
+      name: name,
+      publicName: name,
+      description: name,
+      isNegative: isNegative,
+    );
+    emit(state.copyWith(habit: updatedHabit));
+    await habitRepo.update(updatedHabit);
+  }
+
+  Future<void> updateCheckinWindow({TimeOfDay? open, TimeOfDay? close}) async {
+    if (state.habit == null) return;
+    final updatedHabit = state.habit!.copyWith(
+      checkinOpenWindow: open,
+      checkinCloseWindow: close,
+    );
+    emit(state.copyWith(habit: updatedHabit));
+    _updateDuration();
+    await habitRepo.update(updatedHabit);
+  }
+
+  Future<void> updateTriggers(List<TimeOfDay> triggers) async {
+    if (state.habit == null) return;
+    final updatedHabit = state.habit!.copyWith(triggers: triggers);
+    emit(state.copyWith(habit: updatedHabit));
+    await habitRepo.update(updatedHabit);
+  }
+}

@@ -72,5 +72,37 @@ class HabitModel extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, name, description, isNegative];
+  List<Object?> get props => [
+        id,
+        name,
+        description,
+        isNegative,
+        checkinOpenWindow,
+        checkinCloseWindow,
+        triggers,
+        publicName
+      ];
+
+  /// Creates a copy of this habit but with the given fields replaced with the new values.
+  HabitModel copyWith({
+    String? id,
+    String? name,
+    String? publicName,
+    String? description,
+    bool? isNegative,
+    TimeOfDay? checkinOpenWindow,
+    TimeOfDay? checkinCloseWindow,
+    List<TimeOfDay>? triggers,
+  }) {
+    return HabitModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      publicName: publicName ?? this.publicName,
+      description: description ?? this.description,
+      isNegative: isNegative ?? this.isNegative,
+      checkinOpenWindow: checkinOpenWindow ?? this.checkinOpenWindow,
+      checkinCloseWindow: checkinCloseWindow ?? this.checkinCloseWindow,
+      triggers: triggers ?? this.triggers,
+    );
+  }
 }

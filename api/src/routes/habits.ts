@@ -22,6 +22,16 @@ HabitRoute.post("/", async (c) => {
 });
 
 
+
+HabitRoute.patch("/:habitId", async (c) => {
+    const uid = c.var.jwtPayload.uid;
+    const habitId = c.req.param("habitId");
+    const data = await c.req.json();
+    const habit = NewHabitSchema.parse(data);
+    await Firebase.firestore().collection("users").doc(uid).collection("habits").doc(habitId).update(habit);
+    return c.json({ success: true });
+});
+
 HabitRoute.get("/", async (c) => {
     const uid = c.var.jwtPayload.uid;
     const habits = await Firebase.firestore().collection("users").doc(uid).collection("habits").get();

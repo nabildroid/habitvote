@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:habitvote/features/habit/application/cubits/habit_tracker_cubit.dart';
+import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
 import 'package:habitvote/shared/widgets/timeWindowPicker/time_window_picker.dart';
 
 class EditCheckInWindowScreen extends StatefulWidget {
@@ -17,9 +20,19 @@ class _EditCheckInWindowScreenState extends State<EditCheckInWindowScreen> {
   @override
   void initState() {
     super.initState();
-    // TODO: Fetch initial values from habit using widget.habitId
-    _openWindow = const TimeOfDay(hour: 8, minute: 0);
-    _closeWindow = const TimeOfDay(hour: 9, minute: 0);
+
+    final habit = context.habitState.habit;
+    _openWindow =
+        habit?.checkinOpenWindow ?? const TimeOfDay(hour: 8, minute: 0);
+    _closeWindow =
+        habit?.checkinCloseWindow ?? const TimeOfDay(hour: 9, minute: 0);
+  }
+
+  void save() {
+    context.habitCubit.updateCheckinWindow(
+      open: _openWindow,
+      close: _closeWindow,
+    );
   }
 
   @override
@@ -31,7 +44,7 @@ class _EditCheckInWindowScreenState extends State<EditCheckInWindowScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              // TODO: Implement save logic
+              save();
               Navigator.of(context).pop();
             },
             child: const Text('Save'),

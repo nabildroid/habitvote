@@ -14,6 +14,10 @@ class HabitCache {
     await _habits.record(id).delete(_db);
   }
 
+  Future<void> update(HabitModel habit) async {
+    await _habits.record(habit.id).put(_db, habit.toJson());
+  }
+
   Future<HabitModel?> get(String id) async {
     final record = await _habits.record(id).get(_db);
     if (record == null) return null;

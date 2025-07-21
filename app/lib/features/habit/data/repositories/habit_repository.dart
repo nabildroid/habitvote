@@ -50,6 +50,19 @@ class HabitRepo {
     }
   }
 
+  Future<void> update(HabitModel habit) async {
+    // Update in cache first
+    await cache.update(habit);
+
+    try {
+      await remote.update(habit);
+      // Optional: If successful, ensure it's not in the pending list
+      await kv.removePendingHabitId(habit.id);
+    } catch (e) {
+      await kv.addPendingHabitId(habit.id);
+    }
+  }
+
   Future<List<HabitModel>> getAll() async {
     final records = await cache.getAll();
 
@@ -64,6 +77,7 @@ class HabitRepo {
 
 extension HabitRepoSync on HabitRepo {
   Future<void> _syncPendingHabits() async {
+    // todo make sure this also handle updates
     final pendingIds = await kv.getPendingHabitIds();
     if (pendingIds.isEmpty) {
       print("No pending habits to sync.");

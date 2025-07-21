@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:habitvote/features/habit/application/cubits/habit_tracker_cubit.dart';
+import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
 
 class EditHabitNameScreen extends StatefulWidget {
   final String habitId;
@@ -10,7 +12,7 @@ class EditHabitNameScreen extends StatefulWidget {
 
 class _EditHabitNameScreenState extends State<EditHabitNameScreen> {
   late final TextEditingController _nameController;
-  bool _isPositiveHabit = true; // true for 'build', false for 'break'
+  late bool _isNegativeHabit = true; // true for 'build', false for 'break'
 
   final List<String> _positiveHabitSuggestions = [
     'Read for 15 minutes',
@@ -37,14 +39,22 @@ class _EditHabitNameScreenState extends State<EditHabitNameScreen> {
   @override
   void initState() {
     super.initState();
-    // TODO: Fetch initial values from habit using widget.habitId
-    _nameController = TextEditingController(text: '');
+    final habit = context.habitState.habit;
+    _nameController = TextEditingController(text: habit?.name ?? '');
+    _isNegativeHabit = habit?.isNegative ?? true;
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     super.dispose();
+  }
+
+  void save() {
+    context.habitCubit.updateHabitDetails(
+      name: _nameController.text,
+      isNegative: _isNegativeHabit,
+    );
   }
 
   @override
@@ -57,7 +67,7 @@ class _EditHabitNameScreenState extends State<EditHabitNameScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              // TODO: Implement save logic with _nameController.text and _isPositiveHabit
+              save();
               Navigator.of(context).pop();
             },
             child: const Text('Save'),
@@ -107,8 +117,8 @@ class _EditHabitNameScreenState extends State<EditHabitNameScreen> {
                     title: 'Build a Habit',
                     subtitle: 'I want to start doing this.',
                     icon: Icons.add_circle_outline,
-                    isSelected: _isPositiveHabit,
-                    onTap: () => setState(() => _isPositiveHabit = true),
+                    isSelected: !_isNegativeHabit,
+                    onTap: () => setState(() => _isNegativeHabit = false),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -117,8 +127,8 @@ class _EditHabitNameScreenState extends State<EditHabitNameScreen> {
                     title: 'Break a Habit',
                     subtitle: 'I want to stop doing this.',
                     icon: Icons.remove_circle_outline,
-                    isSelected: !_isPositiveHabit,
-                    onTap: () => setState(() => _isPositiveHabit = false),
+                    isSelected: _isNegativeHabit,
+                    onTap: () => setState(() => _isNegativeHabit = true),
                   ),
                 ),
               ],
@@ -133,9 +143,9 @@ class _EditHabitNameScreenState extends State<EditHabitNameScreen> {
 
   Widget _buildHabitSuggestions() {
     final theme = Theme.of(context);
-    final suggestions = _isPositiveHabit
-        ? _positiveHabitSuggestions
-        : _negativeHabitSuggestions;
+    final suggestions = _isNegativeHabit
+        ? _negativeHabitSuggestions
+        : _positiveHabitSuggestions;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

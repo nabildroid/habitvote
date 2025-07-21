@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:habitvote/features/habit/application/cubits/habit_tracker_cubit.dart';
+import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
 import 'package:habitvote/shared/widgets/verticalTimeHeatmap/vertical_time_heatmap.dart';
 
 class EditHabitTriggersScreen extends StatefulWidget {
@@ -11,12 +13,13 @@ class EditHabitTriggersScreen extends StatefulWidget {
 }
 
 class _EditHabitTriggersScreenState extends State<EditHabitTriggersScreen> {
-  List<TimeOfDay> _triggers = [];
+  late List<TimeOfDay> _triggers;
 
   @override
   void initState() {
     super.initState();
-    // TODO: Fetch initial triggers for the habit using widget.habitId
+
+    _triggers = context.habitState.habit?.triggers ?? [];
   }
 
   void _toggleTrigger(TimeOfDay time) {
@@ -37,6 +40,10 @@ class _EditHabitTriggersScreenState extends State<EditHabitTriggersScreen> {
     });
   }
 
+  void save() {
+    context.habitCubit.updateTriggers(_triggers);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,7 +53,7 @@ class _EditHabitTriggersScreenState extends State<EditHabitTriggersScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              // TODO: Implement save logic
+              save();
               Navigator.of(context).pop();
             },
             child: const Text('Save'),
