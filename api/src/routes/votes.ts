@@ -11,49 +11,9 @@ const VotesRoute = new Hono();
 
 
 
+VotesRoute.get("/candidates", async (c) => {
 
-
-const getTodayVoteId = (habitId: string) => {
-    const today = new Date().toISOString().split("T")[0];
-    return today + "-" + habitId;
-}
-
-
-VotesRoute.get("/:habitId", async (c) => {
-    if (!c.var.jwtPayload.uid) return c.json({ error: "Unauthorized" }, { status: 401 });
-    const uid = c.var.jwtPayload.uid;
-
-    const habitId = c.req.param("habitId");
-    if (!habitId) return c.json({ error: "Habit ID is required" });
-
-
-
-    const ref = Firebase.firestore().collection("users").doc(uid).collection("votes");
-    const voteId = getTodayVoteId(habitId);
-    const vote = await ref.doc(voteId).get();
-
-    if (!vote.exists) {
-        return c.json({ error: "No votes found for today" }, { status: 404 });
-    }
-
-    const data = vote.data();
-    if (!data) {
-        return c.json({ error: "No data found" }, { status: 404 });
-    }
-
-    data.id = vote.id; // Add the document ID to the response
-    data.createdAt = data.createdAt.toDate();
-    data.lastUpdate = data.lastUpdate.toDate();
-
-
-
-    return c.json(data);
-});
-
-
-
-
-VotesRoute.get("candidates", async (c) => {
+    console.log('candidate')
     if (!c.var.jwtPayload.uid) return c.json({ error: "Unauthorized" }, { status: 401 });
 
     const dummyData = [
@@ -113,6 +73,52 @@ VotesRoute.get("candidates", async (c) => {
 
     return c.json({ available: dummyData });
 });
+
+
+
+
+
+
+const getTodayVoteId = (habitId: string) => {
+    const today = new Date().toISOString().split("T")[0];
+    return today + "-" + habitId;
+}
+
+
+VotesRoute.get("/:habitId", async (c) => {
+    if (!c.var.jwtPayload.uid) return c.json({ error: "Unauthorized" }, { status: 401 });
+    const uid = c.var.jwtPayload.uid;
+
+    const habitId = c.req.param("habitId");
+    if (!habitId) return c.json({ error: "Habit ID is required" });
+
+
+
+    const ref = Firebase.firestore().collection("users").doc(uid).collection("votes");
+    const voteId = getTodayVoteId(habitId);
+    const vote = await ref.doc(voteId).get();
+
+    if (!vote.exists) {
+        return c.json({ error: "No votes found for today" }, { status: 404 });
+    }
+
+    const data = vote.data();
+    if (!data) {
+        return c.json({ error: "No data found" }, { status: 404 });
+    }
+
+    data.id = vote.id; // Add the document ID to the response
+    data.createdAt = data.createdAt.toDate();
+    data.lastUpdate = data.lastUpdate.toDate();
+
+
+
+    return c.json(data);
+});
+
+
+
+
 
 
 
@@ -209,26 +215,26 @@ VotesRoute.post("/on/:candidatId/:habitId", async (c) => {
 VotesRoute.get("/on/bot", async (c) => {
     // if (!c.var.jwtPayload.admin) return c.json({ error: "Unauthorized" }, { status: 401 });
 
-    const available = await getCandidates();
+    // const available = await getCandidates();
 
-    const ratio = 1//0.3;
+    // const ratio = 1//0.3;
 
 
-    for (const uid of available) {
-        if (Math.random() > ratio) continue;
-        const habits = await Firebase.firestore().collection("users").doc(uid).collection("habits").get();
-        const data = habits.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as IHabit[];
+    // for (const uid of available) {
+    //     if (Math.random() > ratio) continue;
+    //     const habits = await Firebase.firestore().collection("users").doc(uid).collection("habits").get();
+    //     const data = habits.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as IHabit[];
 
-        const habit = data.find(e => e.isActive);
-        if (!habit) continue;
+    //     const habit = data.find(e => e.isActive);
+    //     if (!habit) continue;
 
-        const decision = Math.random() > 0.5 ? "up" : "down";
-        await VoteOn({
-            userId: uid,
-            habitId: habit.id,
-            decision: decision
-        });
-    }
+    //     const decision = Math.random() > 0.5 ? "up" : "down";
+    //     await VoteOn({
+    //         userId: uid,
+    //         habitId: habit.id,
+    //         decision: decision
+    //     });
+    // }
 
     return c.json({ success: true });
 });
