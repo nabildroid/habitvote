@@ -3,9 +3,11 @@ import { Firebase } from "../repositories/firebase";
 import { generateVoteId } from "../utils";
 import Admin from "firebase-admin";
 import { getNotificationTokens } from "../repositories/notifications";
-import type { IHabit } from "../db/types";
+import type { ICheckin, IHabit } from "../db/types";
+import { getAllCandidates } from "../service/tempCandidateMatcher";
 
 const VotesRoute = new Hono();
+
 
 
 
@@ -16,62 +18,48 @@ VotesRoute.get("/candidates", async (c) => {
     console.log('candidate')
     if (!c.var.jwtPayload.uid) return c.json({ error: "Unauthorized" }, { status: 401 });
 
-    const dummyData = [
-        {
-            id: "user-alice-123",
-            habitId: "habit-read-book-456",
-            habitName: "Read 10 pages daily",
-            checkins: Array.from({ length: 8 }).map((_, i) => {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                return Math.random() < 0.5 ? date : null;
-            }).filter(d => d !== null) as Date[],
-        },
-        {
-            id: "user-bob-789",
-            habitId: "habit-morning-jog-012",
-            habitName: "Morning jog for 15 minutes",
-            checkins: Array.from({ length: 8 }).map((_, i) => {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                return Math.random() < 0.5 ? date : null;
-            }).filter(d => d !== null) as Date[],
-        },
-        {
-            id: "user-charlie-345",
-            habitId: "habit-drink-water-678",
-            habitName: "Drink 8 glasses of water",
-            checkins: Array.from({ length: 8 }).map((_, i) => {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                return Math.random() < 0.5 ? date : null;
-            }).filter(d => d !== null) as Date[],
-        },
-        {
-            id: "user-diana-901",
-            habitId: "habit-meditate-234",
-            habitName: "Meditate for 5 minutes",
-            checkins: Array.from({ length: 8 }).map((_, i) => {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                return Math.random() < 0.5 ? date : null;
-            }).filter(d => d !== null) as Date[],
-        },
-        {
-            id: "user-ethan-567",
-            habitId: "habit-no-sugar-890",
-            habitName: "No sugar after 8 PM",
-            checkins: Array.from({ length: 8 }).map((_, i) => {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                return Math.random() < 0.5 ? date : null;
-            }).filter(d => d !== null) as Date[],
+
+
+    let candidates = await getAllCandidates();
+
+    candidates.sort(() => Math.random() - 0.5); // Shuffle candidates
+    candidates = candidates.slice(0, 10); // Limit to 5 candidates
+
+    // fetch habits
+
+    const promises = candidates.map(async (candidate) => {
+        const habitsPromise = Firebase.firestore().collection("users").doc(candidate.candidateId).collection("habits").get();
+        const checkinsPromise = Firebase.firestore().collection("users").doc(candidate.candidateId).collection("checkin").get();
+
+        const [habits, checkins] = await Promise.all([habitsPromise, checkinsPromise]);
+
+        const data = habits.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as IHabit[];
+
+        let checkinData = checkins.docs.map((doc) => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                date: data.date.toDate(),
+                createdAt: data.createdAt.toDate(),
+            };
+        }) as ICheckin[];
+        // filter by habitId
+        checkinData = checkinData.filter((checkin) => checkin.habitId === candidate.habitId);
+
+
+        return {
+            id: candidate.candidateId,
+            habitId: candidate.habitId,
+            habitName: data.find(h => h.id === candidate.habitId)?.name || "Unknown Habit",
+            checkins: [...checkinData.map(c => c.date)],
         }
-    ]
 
+    });
 
+    const available = await Promise.all(promises);
 
-    return c.json({ available: dummyData });
+    return c.json({ available });
 });
 
 
@@ -135,7 +123,7 @@ async function VoteOn(parmas: {
 
     console.log(parmas);
 
-    
+
     const vote = {
         id: voteId,
         lastUpdate: new Date(),
@@ -215,35 +203,29 @@ VotesRoute.post("/on/:candidatId/:habitId", async (c) => {
 VotesRoute.get("/on/bot", async (c) => {
     // if (!c.var.jwtPayload.admin) return c.json({ error: "Unauthorized" }, { status: 401 });
 
-    // const available = await getCandidates();
+    const available = await getAllCandidates();
 
-    // const ratio = 1//0.3;
+    const ratio = 1//0.3;
 
 
-    // for (const uid of available) {
-    //     if (Math.random() > ratio) continue;
-    //     const habits = await Firebase.firestore().collection("users").doc(uid).collection("habits").get();
-    //     const data = habits.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as IHabit[];
+    for (const { candidateId, habitId } of available) {
+        if (Math.random() > ratio) continue;
 
-    //     const habit = data.find(e => e.isActive);
-    //     if (!habit) continue;
+        console.log("Bot voting on", candidateId, habitId);
 
-    //     const decision = Math.random() > 0.5 ? "up" : "down";
-    //     await VoteOn({
-    //         userId: uid,
-    //         habitId: habit.id,
-    //         decision: decision
-    //     });
-    // }
+
+        const decision = Math.random() > 0.5 ? "up" : "down";
+        await VoteOn({
+            userId: candidateId,
+            habitId: habitId,
+            decision: decision
+        });
+    }
 
     return c.json({ success: true });
 });
 
 
-
-async function getCandidates() {
-    Firebase.firestore().collection("users").listDocuments()
-}
 
 
 

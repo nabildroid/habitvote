@@ -6,6 +6,8 @@ import HabitRoute from './routes/habits';
 import CheckinRoute from './routes/checkins';
 import VotesRoute from './routes/votes';
 import UserRoute from './routes/user';
+import { redis } from './repositories/upstash';
+import { getAllCandidates } from './service/tempCandidateMatcher';
 
 const app = new Hono()
 app.use(poweredBy({ serverName: "Laknabil.me" }))
@@ -50,6 +52,7 @@ app.route("/user", UserRoute);
 app.get('/ping', async (c) => {
     const timer = Date.now();
     const delay = Date.now() - timer;
+    
     return c.text('Hello Bun! ' + delay + "ms");
 })
 

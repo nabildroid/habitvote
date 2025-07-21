@@ -11,7 +11,7 @@ class VotesRepo {
 
   Future<VoteModel?> getTodayVoteByHabitId(String habitId) async {
     if (isOnline.value) {
-      final remoteVote = await remote.get();
+      final remoteVote = await remote.get(habitId);
 
       if (remoteVote != null) {
         await cache.put(remoteVote);

@@ -10,9 +10,9 @@ class VotesRemote extends AuthorizedDio {
     locator.get<AuthService>().subscribeToToken(this);
   }
 
-  Future<VoteModel?> get() async {
+  Future<VoteModel?> get(String habitId) async {
     try {
-      final response = await (await http).get("/votes");
+      final response = await (await http).get("/votes/$habitId");
       if (response.data == null) return null;
 
       return VoteModel.fromJson(response.data);

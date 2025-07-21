@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
 import 'package:habitvote/features/vote/presentation/widgets/checkin/voter_results.dart';
-import 'package:habitvote/features/vote/presentation/widgets/condidats_voting.dart';
+import 'package:habitvote/features/vote/presentation/widgets/candidats_voting.dart';
 import 'package:habitvote/shared/widgets/brilliant_ok_button.dart';
 
 // todo change the name to be something more meanful
@@ -32,7 +32,7 @@ class ViewVotingResult extends StatelessWidget {
         BrilliantOkButton(
           text: "Predict People Decipline",
           onPressed: () {
-            CondidatsVoting.show(context);
+            CandidatsVoting.show(context);
           },
         )
       ],
@@ -54,7 +54,7 @@ class VoteOnPeople extends StatelessWidget {
         BrilliantOkButton(
             text: "Vote on 3 People to see Yours",
             onPressed: () {
-              CondidatsVoting.show(context);
+              CandidatsVoting.show(context);
             })
       ],
     );

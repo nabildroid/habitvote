@@ -39,7 +39,7 @@ class CustomAppBar extends AppBar {
               child: Row(
                 children: [
                   const Text(
-                    '150',
+                    "", //'150',
                     style: TextStyle(
                         color: Colors.black,
                         fontSize: 18,

@@ -21,9 +21,9 @@ class _VoteCandidate {
   });
 }
 
-class CondidatsVoting extends StatefulWidget {
+class CandidatsVoting extends StatefulWidget {
   final bool debug;
-  const CondidatsVoting({
+  const CandidatsVoting({
     super.key,
     this.debug = false,
   });
@@ -54,7 +54,7 @@ class CondidatsVoting extends StatefulWidget {
                         child: Center(
                             child: CircularProgressIndicator(
                                 color: Colors.black87)))
-                    : CondidatsVoting(debug: debug),
+                    : CandidatsVoting(debug: debug),
               );
             });
       },
@@ -77,10 +77,10 @@ class CondidatsVoting extends StatefulWidget {
   }
 
   @override
-  State<CondidatsVoting> createState() => _CondidatsVotingState();
+  State<CandidatsVoting> createState() => _CandidatsVotingState();
 }
 
-class _CondidatsVotingState extends State<CondidatsVoting> {
+class _CandidatsVotingState extends State<CandidatsVoting> {
   late final PageController _pageController;
   int _currentPage = 0;
   Offset _dragPosition = Offset.zero;
@@ -101,10 +101,13 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
               id: c.id,
               title: c.habitName,
               reputation: 10,
-              streak: List.generate(
-                  30,
-                  (index) => c.checkins.contains(
-                      DateTime.now().subtract(Duration(days: index)))),
+              streak: List.generate(30, (i) {
+                final day = DateTime.now().subtract(Duration(days: 29 - i));
+                return c.checkins.any((checkin) =>
+                    checkin.year == day.year &&
+                    checkin.month == day.month &&
+                    checkin.day == day.day);
+              }),
             ))
         .take(widget.debug ? 1000 : 3)
         .toList();
@@ -117,7 +120,7 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
-      CondidatsVoting._needTutorial().then((needTutorial) {
+      CandidatsVoting._needTutorial().then((needTutorial) {
         if (needTutorial && mounted) {
           _runDragTutorial();
         }
@@ -381,6 +384,11 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
   }
 
   Widget _buildCardHeader(_VoteCandidate candidate) {
+    final trueCount = candidate.streak.where((s) => s).length;
+    final totalCount = candidate.streak.length;
+    final ratio = totalCount > 0 ? trueCount / totalCount : 0.0;
+    final score = (ratio * 10).round();
+
     return Row(
       children: [
         const CircleAvatar(
@@ -404,7 +412,7 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: LinearProgressIndicator(
-                        value: candidate.reputation / 10,
+                        value: ratio,
                         backgroundColor: Colors.grey[400],
                         valueColor:
                             const AlwaysStoppedAnimation<Color>(Colors.black),
@@ -414,7 +422,7 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '${candidate.reputation}/10',
+                    '$score/10',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -449,18 +457,23 @@ class _CondidatsVotingState extends State<CondidatsVoting> {
   }
 
   Widget _buildXpInfo() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: const Text(
-        'Good Prediction = 60 XP',
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
+    return GestureDetector(
+      onTap: () {
+        _runDragTutorial();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: const Text(
+          'Good Prediction = 60 XP',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
         ),
       ),
     );

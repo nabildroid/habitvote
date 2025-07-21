@@ -6,6 +6,7 @@ import 'package:habitvote/features/home/presentation/menu_drawer.dart';
 import 'package:habitvote/features/home/presentation/widgets/checkin.dart';
 import 'package:habitvote/features/habit/presentations/widgets/streak_view.dart';
 import 'package:habitvote/features/home/presentation/widgets/custom_app_bar.dart';
+import 'package:habitvote/features/user/application/cubits/presence_cubit.dart';
 import 'package:habitvote/features/user/presentation/widget/presence/users_live_map.dart';
 import 'package:habitvote/features/vote/presentation/widgets/today_voters_overview.dart';
 import 'package:habitvote/shared/widgets/gradientDevider.dart';
@@ -29,41 +30,34 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 20),
-                      Builder(builder: (ctx) {
-                        return Text(
-                          ctx.watch<HabitTrackerCubit>().state.habit?.name ??
-                              'Welcome to HabitVote',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 28, fontWeight: FontWeight.bold),
-                        );
-                      }),
-                      const SizedBox(height: 30),
-                      StreakView(),
-                      const SizedBox(height: 15),
-                      Gradientdevider(),
-                      const SizedBox(height: 30),
-                      StreamBuilder(
-                          stream: context.habitCubit.durationToOpenWindow,
-                          builder: (ctx, s) => TodayVotersOverview(
-                                activePeople: 100,
-                                resultMin: s.data?.inMinutes ?? 0,
-                              )),
-                      const SizedBox(height: 20),
-                      Container(
-                        height: 100,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: UsersLiveMap(),
-                      ),
-                      const SizedBox(height: 20),
-                    ])),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 20),
+                    Builder(builder: (ctx) {
+                      return Text(
+                        ctx.watch<HabitTrackerCubit>().state.habit?.name ??
+                            'Welcome to HabitVote',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 28, fontWeight: FontWeight.bold),
+                      );
+                    }),
+                    const SizedBox(height: 30),
+                    StreakView(),
+                    const SizedBox(height: 15),
+                    Gradientdevider(),
+                    const SizedBox(height: 30),
+                    _buildTodayVotersOverview(context),
+                    const SizedBox(height: 10),
+                  ]),
+            ),
+            AspectRatio(
+              aspectRatio: 15 / 5,
+              child: UsersLiveMap(),
+            ),
+            const SizedBox(height: 20),
             Stack(
               clipBehavior: Clip.none,
               children: [
@@ -100,6 +94,16 @@ class _HomeScreenState extends State<HomeScreen> {
             )
           ],
         ),
+      ),
+    );
+  }
+
+  _buildTodayVotersOverview(BuildContext context) {
+    return StreamBuilder(
+      stream: context.habitCubit.durationToOpenWindow,
+      builder: (ctx, s) => TodayVotersOverview(
+        activePeople: context.watch<PresenceCubit>().state.liveUsers,
+        resultMin: s.data?.inMinutes ?? 0,
       ),
     );
   }

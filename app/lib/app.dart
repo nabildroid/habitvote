@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:habitvote/core/custom_router.dart';
 import 'package:habitvote/features/premium/application/premium_cubit.dart';
 import 'package:habitvote/features/user/application/cubits/auth_cubit.dart';
+import 'package:habitvote/features/user/application/cubits/presence_cubit.dart';
 import 'package:habitvote/features/vote/application/votes_cubit.dart';
 
 import 'core/locator.dart';
@@ -27,6 +28,7 @@ class HabitVoteApp extends StatelessWidget {
               ..init()
               ..syncWithHabit(ctx),
             lazy: false),
+        BlocProvider(create: (ctx) => PresenceCubit(), lazy: false),
       ],
       child: MaterialApp.router(
         localizationsDelegates: [

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:habitvote/features/habit/application/cubits/habit_tracker_cubit.dart';
 import 'package:habitvote/features/user/application/cubits/auth_cubit.dart';
-import 'package:habitvote/features/vote/presentation/widgets/condidats_voting.dart';
+import 'package:habitvote/features/vote/presentation/widgets/candidats_voting.dart';
 import 'package:habitvote/shared/widgets/brilliant_ok_button.dart';
 
 class MenuDrawer extends StatelessWidget {
@@ -148,7 +148,7 @@ class MenuDrawer extends StatelessWidget {
                     title: 'Vote On People',
                     onTap: () {
                       Navigator.pop(context);
-                      CondidatsVoting.show(context, debug: true);
+                      CandidatsVoting.show(context, debug: true);
                     },
                   ),
                 ],

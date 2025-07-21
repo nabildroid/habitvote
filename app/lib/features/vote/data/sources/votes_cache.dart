@@ -31,7 +31,7 @@ class VotesCache {
       final todayString = DateTime.now().toIso8601String().split('T').first;
       return votes
           .where(
-            (vote) => vote.id == todayString,
+            (vote) => vote.id.startsWith(todayString),
           )
           .firstOrNull;
     });
