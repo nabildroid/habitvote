@@ -5,6 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:habitvote/core/locator.dart';
+import 'package:habitvote/features/habit/presentations/screens/edit_habit/edit_check_in_window_screen.dart';
+import 'package:habitvote/features/habit/presentations/screens/edit_habit/edit_habit.dart';
+import 'package:habitvote/features/habit/presentations/screens/edit_habit/edit_habit_name_screen.dart';
+import 'package:habitvote/features/habit/presentations/screens/edit_habit/edit_habit_triggers_screen.dart';
+import 'package:habitvote/features/habit/presentations/screens/edit_habit/edit_notification_reminders_screen.dart';
 import 'package:habitvote/features/onboarding/presentration/screens/ads_screen.dart';
 import 'package:habitvote/features/onboarding/presentration/screens/onboarding_screen.dart';
 import 'package:habitvote/features/user/application/cubits/auth_cubit.dart';
@@ -40,9 +45,37 @@ final GoRouter router = GoRouter(
   initialLocation: "/onboarding",
   routes: [
     GoRoute(
-      path: "/home",
-      builder: (context, state) => const HomeScreen(),
-    ),
+        path: "/home",
+        builder: (context, state) => const HomeScreen(),
+        routes: [
+          GoRoute(
+            path: "habit/edit/:habitId",
+            builder: (context, state) =>
+                EditHabitScreen(habitId: state.pathParameters["habitId"]!),
+            routes: [
+              GoRoute(
+                path: "name",
+                builder: (context, state) => EditHabitNameScreen(
+                    habitId: state.pathParameters["habitId"]!),
+              ),
+              GoRoute(
+                path: "check-in-window",
+                builder: (context, state) => EditCheckInWindowScreen(
+                    habitId: state.pathParameters["habitId"]!),
+              ),
+              GoRoute(
+                path: "triggers",
+                builder: (context, state) => EditHabitTriggersScreen(
+                    habitId: state.pathParameters["habitId"]!),
+              ),
+              GoRoute(
+                path: "reminders",
+                builder: (context, state) => EditNotificationRemindersScreen(
+                    habitId: state.pathParameters["habitId"]!),
+              ),
+            ],
+          ),
+        ]),
     GoRoute(
       path: "/onboarding",
       builder: (context, state) => const AdsScreen(),

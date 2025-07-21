@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:habitvote/features/habit/application/cubits/habit_tracker_cubit.dart';
 import 'package:habitvote/features/user/application/cubits/auth_cubit.dart';
 import 'package:habitvote/features/vote/presentation/widgets/condidats_voting.dart';
 import 'package:habitvote/shared/widgets/brilliant_ok_button.dart';
@@ -108,7 +110,19 @@ class MenuDrawer extends StatelessWidget {
                     context,
                     icon: Icons.edit_note_outlined,
                     title: 'Edit Habit',
-                    onTap: () => Navigator.pop(context),
+                    onTap: () {
+                      Navigator.pop(context);
+
+                      final habitId =
+                          context.read<HabitTrackerCubit>().state.habit?.id;
+
+                      if (habitId == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('No habit selected')));
+                        return;
+                      }
+                      context.go("/home/habit/edit/$habitId");
+                    },
                   ),
                   _buildMenuItem(
                     context,
