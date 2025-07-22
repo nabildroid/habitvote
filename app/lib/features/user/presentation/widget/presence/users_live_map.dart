@@ -195,7 +195,7 @@ class _UsersLiveMapState extends State<_UsersLiveMap> {
             key: _svgKey,
             fit: BoxFit.fill,
             colorFilter: ColorFilter.mode(
-              Colors.grey.shade300.withAlpha(200),
+              Colors.grey.shade200.withAlpha(200),
               BlendMode.srcIn,
             ),
           ),

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:habitvote/features/habit/application/cubits/habit_tracker_cubit.dart';
 import 'package:habitvote/shared/widgets/brilliant_ok_button.dart';
 
 import 'widgets/activities_section.dart';
@@ -18,25 +20,40 @@ class Activity {
   const Activity({required this.icon, required this.name});
 }
 
-class StatsScreen extends StatefulWidget {
+class StatsScreen extends StatelessWidget {
+  const StatsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HabitTrackerCubit, HabitTrackerState>(
+      builder: (context, state) {
+        return _StatsScreen(
+          completedDates: state.checkins.map((e) => e.date).toList(),
+        );
+      },
+    );
+  }
+}
+
+class _StatsScreen extends StatefulWidget {
   // Example data. In a real app, you'd pass this in.
   final List<DateTime> completedDates;
 
-  const StatsScreen({
+  const _StatsScreen({
     super.key,
     this.completedDates = const [],
   });
 
   @override
-  State<StatsScreen> createState() => _StatsScreenState();
+  State<_StatsScreen> createState() => _StatsScreenState();
 }
 
-class _StatsScreenState extends State<StatsScreen> {
+class _StatsScreenState extends State<_StatsScreen> {
   late DateTime _currentMonth;
   late Set<DateTime> _completedDays;
   late final ScrollController _scrollController1;
   late final ScrollController _scrollController2;
-  bool isPremium = true;
+  bool isPremium = false;
 
   final List<Activity> _activities = const [
     Activity(icon: Icons.how_to_vote_outlined, name: 'Vote'),
@@ -158,7 +175,7 @@ class _StatsScreenState extends State<StatsScreen> {
                   const SizedBox(height: 20),
                   StreakCounter(streak: streak),
                   const SizedBox(height: 30),
-                  MilestoneGoalTracker(streak: 8),
+                  MilestoneGoalTracker(streak: streak),
                   const SizedBox(height: 20),
                   BelieversChart(
                     spots: const [
