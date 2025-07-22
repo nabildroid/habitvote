@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:habitvote/core/locator.dart';
+import 'package:habitvote/features/user/utils/dicebear_picture.dart';
 import 'package:habitvote/features/vote/application/votes_cubit.dart';
 import 'dart:math';
 
@@ -391,9 +392,14 @@ class _CandidatsVotingState extends State<CandidatsVoting> {
 
     return Row(
       children: [
-        const CircleAvatar(
+        CircleAvatar(
           radius: 30,
           backgroundColor: Colors.black,
+          child: CircleAvatar(
+            backgroundImage:
+                NetworkImage(DicebearPicture.lorelei(candidate.id)),
+            radius: 25,
+          ),
         ),
         const SizedBox(width: 16),
         Expanded(

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
 import 'package:habitvote/features/habit/presentations/widgets/checkin/checkin_actions.dart';
+import 'package:habitvote/features/habit/presentations/widgets/skip_premium_popup.dart';
 
 class ClosedWindowCheckIn extends StatelessWidget {
   const ClosedWindowCheckIn({super.key});
@@ -77,24 +78,34 @@ class SkipWaiting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Text('Skip'),
-        const SizedBox(width: 4),
-        const CircleAvatar(
-          backgroundColor: Colors.black,
-          radius: 10,
-          child: Text(
-            '3',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 10,
+    return InkWell(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) => SkipPremiumPopup(
+            skipsLeft: 3,
+          ),
+        );
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text('Skip'),
+          const SizedBox(width: 4),
+          const CircleAvatar(
+            backgroundColor: Colors.black,
+            radius: 10,
+            child: Text(
+              '3',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

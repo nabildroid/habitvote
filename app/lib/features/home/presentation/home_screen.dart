@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:habitvote/features/habit/application/cubits/habit_tracker_cubit.dart';
 import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
 import 'package:habitvote/features/home/presentation/menu_drawer.dart';
@@ -10,6 +11,7 @@ import 'package:habitvote/features/user/application/cubits/presence_cubit.dart';
 import 'package:habitvote/features/user/presentation/widget/presence/users_live_map.dart';
 import 'package:habitvote/features/vote/presentation/widgets/today_voters_overview.dart';
 import 'package:habitvote/shared/widgets/gradientDevider.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:syncfusion_flutter_maps/maps.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -35,15 +37,29 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(height: 20),
-                    Builder(builder: (ctx) {
-                      return Text(
-                        ctx.watch<HabitTrackerCubit>().state.habit?.name ??
-                            'Welcome to HabitVote',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 28, fontWeight: FontWeight.bold),
-                      );
-                    }),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      hoverColor: Colors.grey.shade50,
+                      splashColor: Colors.grey.shade100,
+                      highlightColor: Colors.transparent,
+                      onTap: () {
+                        final id =
+                            context.read<HabitTrackerCubit>().state.habit?.id;
+                        if (id == null) return;
+                        context.go("/home/habit/edit/$id/name");
+                      },
+                      child: Center(
+                        child: Builder(builder: (ctx) {
+                          return Text(
+                            ctx.watch<HabitTrackerCubit>().state.habit?.name ??
+                                'Welcome to HabitVote',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 28, fontWeight: FontWeight.bold),
+                          );
+                        }),
+                      ),
+                    ),
                     const SizedBox(height: 30),
                     StreakView(),
                     const SizedBox(height: 15),

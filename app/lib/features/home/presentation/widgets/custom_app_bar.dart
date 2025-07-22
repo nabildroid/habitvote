@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:habitvote/features/habit/presentations/widgets/appbar_streak_badge.dart';
 
 class CustomAppBar extends AppBar {
   CustomAppBar({
@@ -35,24 +36,8 @@ class CustomAppBar extends AppBar {
           }),
           actions: [
             Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: Row(
-                children: [
-                  const Text(
-                    "", //'150',
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.auto_awesome,
-                    color: Colors.grey[600],
-                  ),
-                ],
-              ),
-            ),
+                padding: const EdgeInsets.only(right: 16.0),
+                child: AppBarStreakBadge()),
           ],
         );
 }

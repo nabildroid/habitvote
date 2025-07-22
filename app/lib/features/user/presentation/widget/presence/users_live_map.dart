@@ -2,16 +2,33 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:habitvote/features/user/application/cubits/presence_cubit.dart';
+import 'package:latlong2/latlong.dart';
 
-class UsersLiveMap extends StatefulWidget {
+class UsersLiveMap extends StatelessWidget {
   const UsersLiveMap({super.key});
 
   @override
-  State<UsersLiveMap> createState() => _UsersLiveMapState();
+  Widget build(BuildContext context) {
+    final locations = context.watch<PresenceCubit>().state.coordinates;
+    return _UsersLiveMap(
+      locations: locations,
+    );
+  }
 }
 
-class _UsersLiveMapState extends State<UsersLiveMap> {
+class _UsersLiveMap extends StatefulWidget {
+  const _UsersLiveMap({super.key, required this.locations});
+
+  final List<LatLng> locations;
+
+  @override
+  State<_UsersLiveMap> createState() => _UsersLiveMapState();
+}
+
+class _UsersLiveMapState extends State<_UsersLiveMap> {
   final GlobalKey _svgKey = GlobalKey();
   Size _svgSize = Size.zero;
   Timer? _sizeCheckTimer;
@@ -76,19 +93,22 @@ class _UsersLiveMapState extends State<UsersLiveMap> {
     1.0000
   ];
 
-  final List<({String name, double latitude, double longitude})> _locations = [
-    (name: 'Algiers', latitude: 36.7538, longitude: 3.0588),
-    (name: 'California', latitude: 36.7783, longitude: -119.4179),
-    (name: 'Germany', latitude: 51.1657, longitude: 10.4515),
-    (name: 'Tokyo', latitude: 35.6895, longitude: 139.6917),
-    (name: 'Sydney', latitude: -33.8688, longitude: 151.2093),
-    (name: 'São Paulo', latitude: -23.5505, longitude: -46.6333),
-  ];
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _startSizeCheck());
+  }
+
+  @override
+  void didUpdateWidget(_UsersLiveMap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.locations != oldWidget.locations) {
+      if (_svgSize != Size.zero) {
+        setState(() {
+          _generateDotPositions();
+        });
+      }
+    }
   }
 
   @override
@@ -107,6 +127,8 @@ class _UsersLiveMapState extends State<UsersLiveMap> {
           renderBox.hasSize &&
           renderBox.size != Size.zero) {
         timer.cancel();
+        // Check if mounted before calling setState
+        if (!mounted) return;
         if (_svgSize != renderBox.size) {
           setState(() {
             _svgSize = renderBox.size;
@@ -146,7 +168,7 @@ class _UsersLiveMapState extends State<UsersLiveMap> {
 
   void _generateDotPositions() {
     _fractionalDotPositions.clear();
-    for (final location in _locations) {
+    for (final location in widget.locations) {
       final fractionalOffset =
           _latLonToFractionalOffset(location.latitude, location.longitude);
       _fractionalDotPositions.add(fractionalOffset);
