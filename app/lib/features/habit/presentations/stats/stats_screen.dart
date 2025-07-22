@@ -36,7 +36,7 @@ class _StatsScreenState extends State<StatsScreen> {
   late Set<DateTime> _completedDays;
   late final ScrollController _scrollController1;
   late final ScrollController _scrollController2;
-  bool isPremium = false;
+  bool isPremium = true;
 
   final List<Activity> _activities = const [
     Activity(icon: Icons.how_to_vote_outlined, name: 'Vote'),
