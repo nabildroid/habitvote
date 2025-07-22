@@ -82,6 +82,10 @@ class UserModel extends Equatable {
     );
   }
 
+  Duration get accountAge {
+    return DateTime.now().difference(createdAt);
+  }
+
   @override
   List<Object?> get props => [uid, email, displayName, createdAt, claims];
 }

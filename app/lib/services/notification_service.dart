@@ -73,7 +73,8 @@ class NotificationService extends AuthorizedDio {
   }
 
   Future<bool> isNotificationEnabled() async {
-    return await kv.timeToEnableNotification();
+    final settings = await fcm.getNotificationSettings();
+    return settings.authorizationStatus == AuthorizationStatus.authorized;
   }
 
   Future<void> registerDevice() async {
@@ -142,34 +143,12 @@ class NotificationService extends AuthorizedDio {
       androidScheduleMode: AndroidScheduleMode.inexact,
     );
   }
-}
 
-extension on KvService {
-  /// Gets the last notification permission request date.
-  /// Returns null on first call and sets the current date.
-  Future<bool> timeToEnableNotification() async {
-    const key = 'last_notification_request_date2';
-    final storedDate = await getString(key);
+  Future<void> cancelAll() async {
+    await _localNotificationsPlugin.cancelAll();
+  }
 
-    if (storedDate == null) {
-      // First time - store current date and return null
-      final now = DateTime.now().add(const Duration(minutes: 5));
-      await setString(key, now.toIso8601String());
-      return true;
-    } else {
-      // Parse the stored date
-      final date = DateTime.parse(storedDate);
-      final now = DateTime.now();
-
-      // If date is in the past, update it to now + 5 minutes
-      if (date.isBefore(now)) {
-        final newDate = now.add(const Duration(minutes: 5));
-        await setString(key, newDate.toIso8601String());
-        return true;
-      }
-    }
-
-    // Return the stored date
-    return false;
+  Future<void> cancelById(int id) async {
+    await _localNotificationsPlugin.cancel(id);
   }
 }

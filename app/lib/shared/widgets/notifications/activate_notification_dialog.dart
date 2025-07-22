@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:habitvote/core/cubits/app_cubit.dart';
 import 'package:habitvote/core/locator.dart';
 import 'package:habitvote/shared/widgets/brilliant_ok_button.dart';
 import 'package:habitvote/services/notification_service.dart';
@@ -6,11 +8,6 @@ import 'package:habitvote/services/notification_service.dart';
 /// Shows a dialog asking the user to activate notifications.
 /// Returns true if “Activate” was tapped.
 Future<bool?> showActivateNotificationDialog(BuildContext context) async {
-  final isEnabled =
-      await locator.get<NotificationService>().isNotificationEnabled();
-
-  if (isEnabled) return null;
-
   final theme = Theme.of(context);
   return showDialog<bool>(
     context: context,
@@ -54,7 +51,7 @@ Future<bool?> showActivateNotificationDialog(BuildContext context) async {
         BrilliantOkButton(
           text: 'Activate',
           onPressed: () async {
-            await locator.get<NotificationService>().registerDevice();
+            context.read<AppCubit>().enableNotifications();
             Navigator.of(context).pop(true);
           },
         )

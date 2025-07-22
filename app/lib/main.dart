@@ -3,7 +3,9 @@ import 'dart:ui';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:habitvote/core/cubits/app_cubit.dart';
 import 'package:habitvote/core/network/connectivity.dart';
 import 'package:habitvote/services/firebase_service.dart';
 import 'package:habitvote/services/notification_service.dart';
@@ -34,7 +36,14 @@ void main() async {
   tz.initializeTimeZones();
 
   await initNotification();
-  runApp(const HabitVoteApp());
+
+  final appCubit = AppCubit();
+  runApp(
+    BlocProvider.value(
+      value: appCubit,
+      child: const HabitVoteApp(),
+    ),
+  );
 }
 
 Future<Database> setUpStorage() async {

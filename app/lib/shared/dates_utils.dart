@@ -51,4 +51,9 @@ extension TimeInDayParser on TimeOfDay {
     final minute = int.parse(parts[1]);
     return TimeOfDay(hour: hour, minute: minute);
   }
+
+  /// set the date time to be this
+  DateTime toDateTime(DateTime date) {
+    return DateTime(date.year, date.month, date.day, hour, minute);
+  }
 }

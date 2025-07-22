@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:habitvote/core/locator.dart';
+import 'package:habitvote/features/habit/application/cubits/notification_habit_cubit_extention.dart';
 import 'package:habitvote/features/habit/data/models/checkin_model.dart';
 import 'package:habitvote/features/habit/data/models/habit_model.dart';
 import 'package:habitvote/features/habit/data/repositories/habit_repository.dart';
@@ -78,6 +79,10 @@ class HabitTrackerCubit extends Cubit<HabitTrackerState> {
 
     final checkins = await trackerRepo.getAll(habit.id, fresh: fresh);
     emit(state.copyWith(checkins: checkins));
+
+    if (!(await isNotificationScheduled())) {
+      rescheduleNotifcations();
+    }
   }
 
   void checkIn({bool isDone = true, DateTime? date}) async {
@@ -92,6 +97,8 @@ class HabitTrackerCubit extends Cubit<HabitTrackerState> {
 
     emit(state.addCheckin(checkin));
     await trackerRepo.create(checkin);
+
+    rescheduleNotifcations();
   }
 
   void undoCheckIn({DateTime? date}) {
@@ -113,6 +120,8 @@ class HabitTrackerCubit extends Cubit<HabitTrackerState> {
       trackerRepo.cache
           .delete(targetCheckin.id, habitId: targetCheckin.habitId);
     }
+
+    rescheduleNotifcations();
   }
 
   // Get check-in for a specific date
@@ -199,6 +208,7 @@ extension HabitEditingExtension on HabitTrackerCubit {
     );
     emit(state.copyWith(habit: updatedHabit));
     await habitRepo.update(updatedHabit);
+    rescheduleNotifcations();
   }
 
   Future<void> updateCheckinWindow({TimeOfDay? open, TimeOfDay? close}) async {
@@ -210,6 +220,7 @@ extension HabitEditingExtension on HabitTrackerCubit {
     emit(state.copyWith(habit: updatedHabit));
     _updateDuration();
     await habitRepo.update(updatedHabit);
+    rescheduleNotifcations();
   }
 
   Future<void> updateTriggers(List<TimeOfDay> triggers) async {

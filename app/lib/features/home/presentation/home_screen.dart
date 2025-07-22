@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:habitvote/core/cubits/app_cubit.dart';
+import 'package:habitvote/core/utils/app_context_extension.dart';
 import 'package:habitvote/features/habit/application/cubits/habit_tracker_cubit.dart';
 import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
 import 'package:habitvote/features/home/presentation/menu_drawer.dart';
@@ -10,6 +12,7 @@ import 'package:habitvote/features/home/presentation/widgets/custom_app_bar.dart
 import 'package:habitvote/features/user/application/cubits/presence_cubit.dart';
 import 'package:habitvote/features/user/presentation/widget/presence/users_live_map.dart';
 import 'package:habitvote/features/vote/presentation/widgets/today_voters_overview.dart';
+import 'package:habitvote/shared/widgets/notifications/disabled_notification_aleart.dart';
 import 'package:habitvote/shared/widgets/gradientDevider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:syncfusion_flutter_maps/maps.dart';
@@ -104,6 +107,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   children: [
+                    if (!context.watchAppState.isNotificationEnabled)
+                      const DisabledNotificationAlert(),
                     const SizedBox(height: 15),
                     Gradientdevider(),
                     const SizedBox(height: 40),

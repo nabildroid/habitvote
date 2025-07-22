@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:habitvote/features/habit/application/cubits/habit_tracker_cubit.dart';
+import 'package:habitvote/features/habit/application/cubits/notification_habit_cubit_extention.dart';
+import 'package:habitvote/features/habit/data/models/notifications/notification_config_model.dart';
+import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
 
 class EditNotificationRemindersScreen extends StatefulWidget {
   final String habitId;
@@ -18,7 +22,23 @@ class _EditNotificationRemindersScreenState
   @override
   void initState() {
     super.initState();
-    // TODO: Fetch initial reminder settings for the habit using widget.habitId
+
+    context.habitCubit.getNotificationConfig().then((config) {
+      if (!mounted) return;
+      setState(() {
+        _remindBeforeCheckin = config.before5Minutes;
+        _remindRandomly = config.randomInWindown;
+      });
+    });
+  }
+
+  void save() {
+    context.habitCubit.saveNotificationConfig(
+      HabitNotificationConfigModel(
+        before5Minutes: _remindBeforeCheckin,
+        randomInWindown: _remindRandomly,
+      ),
+    );
   }
 
   @override
@@ -30,7 +50,7 @@ class _EditNotificationRemindersScreenState
         actions: [
           TextButton(
             onPressed: () {
-              // TODO: Implement save logic
+              save();
               Navigator.of(context).pop();
             },
             child: const Text('Save'),
