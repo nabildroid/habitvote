@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
 
 class AppBarStreakBadge extends StatelessWidget {
@@ -29,24 +30,28 @@ class AppBarStreakBadge extends StatelessWidget {
     final inactiveColor = Colors.grey;
     final displayColor = isTodayDone ? activeColor : inactiveColor;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          '$streak',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: displayColor,
-            fontSize: 16,
+    return InkWell(
+      onTap: () => context.go("/home/habit/stats"),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            '$streak',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: displayColor,
+              fontSize: 16,
+            ),
           ),
-        ),
-        const SizedBox(width: 4),
-        Icon(
-          Icons.local_fire_department,
-          color: displayColor,
-          size: 22,
-        ),
-      ],
+          const SizedBox(width: 4),
+          Icon(
+            Icons.local_fire_department,
+            color: displayColor,
+            size: 22,
+          ),
+        ],
+      ),
     );
   }
 

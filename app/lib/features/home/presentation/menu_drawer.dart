@@ -108,7 +108,7 @@ class MenuDrawer extends StatelessWidget {
                   ),
                   _buildMenuItem(
                     context,
-                    icon: Icons.edit_note_outlined,
+                    icon: Icons.settings_outlined,
                     title: 'Edit Habit',
                     onTap: () {
                       Navigator.pop(context);
@@ -127,29 +127,17 @@ class MenuDrawer extends StatelessWidget {
                   _buildMenuItem(
                     context,
                     icon: Icons.insights_outlined,
-                    title: 'Progress',
-                    onTap: () => Navigator.pop(context),
-                  ),
-                  _buildMenuItem(
-                    context,
-                    icon: Icons.settings_outlined,
-                    title: 'Settings',
-                    onTap: () => Navigator.pop(context),
+                    title: 'Statistics',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go("/home/habit/stats");
+                    },
                   ),
                   _buildMenuItem(
                     context,
                     icon: Icons.help_outline,
                     title: 'Help & Support',
                     onTap: () => Navigator.pop(context),
-                  ),
-                  _buildMenuItem(
-                    context,
-                    icon: Icons.how_to_vote,
-                    title: 'Vote On People',
-                    onTap: () {
-                      Navigator.pop(context);
-                      CandidatsVoting.show(context, debug: true);
-                    },
                   ),
                 ],
               ),

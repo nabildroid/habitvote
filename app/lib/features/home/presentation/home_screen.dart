@@ -71,7 +71,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             AspectRatio(
               aspectRatio: 15 / 5,
-              child: UsersLiveMap(),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                hoverColor: Colors.transparent,
+                splashColor: Colors.grey.shade100,
+                highlightColor: Colors.transparent,
+                onTap: () {
+                  context.go("/home/users/presence");
+                },
+                child: UsersLiveMap(),
+              ),
             ),
             const SizedBox(height: 20),
             Stack(
@@ -120,6 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (ctx, s) => TodayVotersOverview(
         activePeople: context.watch<PresenceCubit>().state.liveUsers,
         resultMin: s.data?.inMinutes ?? 0,
+        showVoteSides:
+            context.watch<HabitTrackerCubit>().state.todayCheckin == null,
       ),
     );
   }

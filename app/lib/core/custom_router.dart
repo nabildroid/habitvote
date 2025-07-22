@@ -10,11 +10,14 @@ import 'package:habitvote/features/habit/presentations/screens/edit_habit/edit_h
 import 'package:habitvote/features/habit/presentations/screens/edit_habit/edit_habit_name_screen.dart';
 import 'package:habitvote/features/habit/presentations/screens/edit_habit/edit_habit_triggers_screen.dart';
 import 'package:habitvote/features/habit/presentations/screens/edit_habit/edit_notification_reminders_screen.dart';
+import 'package:habitvote/features/habit/presentations/stats/stats_screen.dart';
 import 'package:habitvote/features/onboarding/presentration/screens/ads_screen.dart';
 import 'package:habitvote/features/onboarding/presentration/screens/onboarding_screen.dart';
 import 'package:habitvote/features/user/application/cubits/auth_cubit.dart';
 import 'package:habitvote/features/user/data/auth_service.dart';
+import 'package:habitvote/features/user/presentation/screens/live_presence_screen.dart';
 import 'package:habitvote/features/user/utils/user_checker.dart';
+import 'package:habitvote/features/vote/presentation/screens/today_vote_people_screen.dart';
 import 'package:habitvote/shared/widgets/block_india.dart';
 import 'package:rxdart/transformers.dart';
 
@@ -56,6 +59,15 @@ final GoRouter router = GoRouter(
         path: "/home",
         builder: (context, state) => const HomeScreen(),
         routes: [
+          GoRoute(
+            path: "users/presence",
+            builder: (context, state) => LivePresenceScreen(),
+          ),
+          // GoRoute(
+          //     path: "votes/today/people",
+          //     builder: (context, state) => TodayVotePeopleScreen()),
+          GoRoute(
+              path: "habit/stats", builder: (context, state) => StatsScreen()),
           GoRoute(
             path: "habit/edit/:habitId",
             builder: (context, state) =>

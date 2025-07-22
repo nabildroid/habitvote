@@ -1,15 +1,18 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:habitvote/features/vote/presentation/utils/votes_context_extension.dart';
 
 class TodayVotersOverview extends StatelessWidget {
   final int? resultMin;
+  final bool showVoteSides;
   final int activePeople;
   const TodayVotersOverview({
     super.key,
     this.resultMin,
     required this.activePeople,
+    this.showVoteSides = true,
   });
 
   @override
@@ -19,37 +22,45 @@ class TodayVotersOverview extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${(state.today?.total ?? 0)} Votes',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            if (resultMin != null && resultMin! > 0)
+        InkWell(
+          hoverColor: Colors.grey.shade50,
+          splashColor: Colors.grey.shade100,
+          highlightColor: Colors.transparent,
+          onTap: () => context.go("/home/votes/today/people"),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
-                resultMin! > 60
-                    ? 'Result in ${(resultMin! / 60).floor()} hours'
-                    : 'Result in ${resultMin} minutes',
-                style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                '${(state.today?.total ?? 0)} Votes',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-          ],
+              const SizedBox(height: 4),
+              if (resultMin != null && resultMin! > 0)
+                Text(
+                  resultMin! > 60
+                      ? 'Result in ${(resultMin! / 60).floor()} hours'
+                      : 'Result in ${resultMin} minutes',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                ),
+            ],
+          ),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildVoteItem(
-              'believe on you',
-              state.today?.up ?? 0,
-              blur: !state.showTodayResults,
-            ),
-            const SizedBox(height: 4),
-            _buildVoteItem(
-              'Challenge you',
-              state.today?.down ?? 0,
-              blur: !state.showTodayResults,
-            ),
+            if (showVoteSides) ...[
+              _buildVoteItem(
+                'believe on you',
+                state.today?.up ?? 0,
+                blur: !state.showTodayResults,
+              ),
+              const SizedBox(height: 4),
+              _buildVoteItem(
+                'Challenge you',
+                state.today?.down ?? 0,
+                blur: !state.showTodayResults,
+              ),
+            ],
             const SizedBox(height: 4),
             _buildVoteItem(
               'Here Today',
