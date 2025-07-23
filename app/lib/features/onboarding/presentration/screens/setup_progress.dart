@@ -101,7 +101,7 @@ class _SetupProgressSlideState extends State<SetupProgressSlide> {
       if (_progress >= 1.0) {
         timer.cancel();
         // A small delay before calling onComplete to show 100%
-        Future.delayed(const Duration(milliseconds: 500), () {
+        Future.delayed(const Duration(milliseconds: 750), () {
           if (mounted) {
             widget.onComplete();
           }

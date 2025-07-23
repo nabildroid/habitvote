@@ -18,23 +18,27 @@ class _HabitChooserState extends State<HabitChooser>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  // --- Simplified Habit Suggestions with Icons ---
   static const Map<String, IconData> _positiveHabitSuggestions = {
-    'Read one chapter of a book': Icons.book_outlined,
-    'Go for a 15-minute walk': Icons.directions_walk,
-    'Drink 8 glasses of water': Icons.water_drop_outlined,
-    'Meditate for 5 minutes': Icons.self_improvement_outlined,
-    'Write one page in a journal': Icons.edit_outlined,
-    'Stretch for 10 minutes': Icons.accessibility_new,
+    'Spend 25 minutes on my main project (Pomodoro)': Icons.timer_outlined,
+    'Write 100 words of original content': Icons.drive_file_rename_outline,
+    'Watch one educational video (not entertainment)': Icons.school_outlined,
+    'Plan tomorrow\'s single most important task': Icons.flag_outlined,
+    'Eat one meal with zero screen interaction': Icons.no_cell_outlined,
+    'Send one meaningful message to a friend (no "hey")': Icons.forum_outlined,
   };
 
+// --- Habits to STOP Doing ---
+// These are the chains of modern life. Breaking them is not about wellness;
+// it's about reclaiming freedom, focus, and control.
+
   static const Map<String, IconData> _negativeHabitSuggestions = {
-    'No social media after 10 PM': Icons.no_cell_outlined,
-    'Avoid sugary drinks': Icons.no_drinks_outlined,
-    'Stop biting my nails': Icons.front_hand_outlined,
     'Don\'t snooze the alarm clock': Icons.alarm_off_outlined,
-    'Avoid negative self-talk': Icons.voice_over_off_outlined,
-    'No impulse shopping online': Icons.shopping_cart_checkout_outlined,
+    'Zero social media for the first hour of the day':
+        Icons.hourglass_top_outlined,
+    'No impulse shopping online': Icons.credit_card_off_outlined,
+    'No ordering from food delivery apps': Icons.no_meals_outlined,
+    'Zero outrage/news feed scrolling': Icons.block_flipped,
+    'No phone in the bedroom': Icons.phone_locked_outlined,
   };
 
   @override
@@ -454,7 +458,7 @@ class _AnimatedSuggestionCardState extends State<AnimatedSuggestionCard>
                     fontSize: 16,
                     height: 1.3,
                   ),
-                  maxLines: 2,
+                  maxLines: 4,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],

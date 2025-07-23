@@ -1,8 +1,4 @@
-import 'dart:io';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:habitvote/core/locator.dart';
 import 'package:habitvote/features/habit/presentations/screens/edit_habit/edit_check_in_window_screen.dart';
@@ -11,18 +7,12 @@ import 'package:habitvote/features/habit/presentations/screens/edit_habit/edit_h
 import 'package:habitvote/features/habit/presentations/screens/edit_habit/edit_habit_triggers_screen.dart';
 import 'package:habitvote/features/habit/presentations/screens/edit_habit/edit_notification_reminders_screen.dart';
 import 'package:habitvote/features/habit/presentations/stats/stats_screen.dart';
-import 'package:habitvote/features/onboarding/presentration/screens/ads_screen.dart';
-import 'package:habitvote/features/onboarding/presentration/screens/onboarding_screen.dart';
-import 'package:habitvote/features/user/application/cubits/auth_cubit.dart';
-import 'package:habitvote/features/user/data/auth_service.dart';
+import 'package:habitvote/features/onboarding/presentration/screens/welcome_screen.dart';
 import 'package:habitvote/features/user/presentation/screens/live_presence_screen.dart';
 import 'package:habitvote/features/user/utils/user_checker.dart';
-import 'package:habitvote/features/vote/presentation/screens/today_vote_people_screen.dart';
 import 'package:habitvote/shared/widgets/block_india.dart';
-import 'package:rxdart/transformers.dart';
 
 // import 'package:posthog_flutter/posthog_flutter.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:habitvote/features/home/presentation/home_screen.dart';
 
 final GoRouter router = GoRouter(
@@ -98,7 +88,7 @@ final GoRouter router = GoRouter(
         ]),
     GoRoute(
       path: "/onboarding",
-      builder: (context, state) => const AdsScreen(),
+      builder: (context, state) => const WelcomeScreen(),
     )
   ],
 );
