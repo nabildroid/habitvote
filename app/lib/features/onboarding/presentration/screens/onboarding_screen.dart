@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:habitvote/features/onboarding/presentration/screens/checkinWindowPicker.dart';
+import 'package:habitvote/features/onboarding/presentration/screens/habit_chooser.dart';
+import 'package:habitvote/features/onboarding/presentration/screens/setup_progress.dart';
 import 'package:habitvote/features/onboarding/presentration/screens/triggerHitmap.dart';
 import 'package:habitvote/features/user/presentation/screens/create_account_slide.dart';
 import 'package:habitvote/features/onboarding/presentration/widgets/habitVoteDifference.dart';
@@ -236,6 +238,7 @@ class HabitCategoryChooser extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12.0),
                   child: SelectableOption(
+                    order: 0,
                     isSelected: state.habitType == "bad", // Check state
                     onSelected: () {
                       context
@@ -249,12 +252,12 @@ class HabitCategoryChooser extends StatelessWidget {
                             backgroundColor: Colors.white,
                             child: Icon(
                               Icons
-                                  .back_hand_sharp, // Consider a 'stop' or 'negative' icon
+                                  .delete_forever_outlined, // Consider a 'stop' or 'negative' icon
                               color: Colors.black,
                             )),
                         SizedBox(width: 16),
                         Text(
-                          "I want to Stop BAD habit",
+                          "Stop BAD habit",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
@@ -264,6 +267,7 @@ class HabitCategoryChooser extends StatelessWidget {
                   ),
                 ),
                 SelectableOption(
+                  order: 1,
                   isSelected: state.habitType == "good", // Check state
                   onSelected: () {
                     context
@@ -282,7 +286,7 @@ class HabitCategoryChooser extends StatelessWidget {
                           )),
                       SizedBox(width: 16),
                       Text(
-                        "I want to Start GOOD habit",
+                        "Start GOOD habit",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
@@ -665,325 +669,6 @@ class HabitVoteDifference extends StatelessWidget {
 
 // --- Add the new HabitChooser Widget ---
 
-class HabitChooser extends StatefulWidget {
-  const HabitChooser({super.key});
-
-  @override
-  State<HabitChooser> createState() => _HabitChooserState();
-}
-
-class _HabitChooserState extends State<HabitChooser> {
-  final TextEditingController _customHabitController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-  final FocusNode _focusNode = FocusNode();
-  // String? _selectedPredefinedHabit; // Removed, rely on cubit state
-
-  // --- Positive Habits Data ---
-  static const Map<String, List<MapEntry<IconData, String>>>
-      _positiveHabitGroups = {
-    'Digital Wellness': [
-      MapEntry(Icons.phone_android_outlined, 'Grayscale Phone after 9 PM'),
-      MapEntry(Icons.savings_outlined, 'Save \$5 on Doomscroll >10min'),
-      MapEntry(Icons.directions_walk, 'Take "Rage Walk" (No Phone)'),
-      MapEntry(Icons.delete_sweep_outlined, 'Delete Delivery Apps After Use'),
-      MapEntry(Icons.reply_outlined, 'Reply DMs within 24h'),
-      MapEntry(Icons.photo_camera_back_outlined, 'Vibe Check Before Posting'),
-      MapEntry(Icons.send_outlined, 'Text Meme to Friend'),
-      MapEntry(Icons.block_flipped, 'Block Distractions after 8 PM'),
-      MapEntry(Icons.power_off_outlined, 'Charge Devices Elsewhere'),
-      MapEntry(Icons.mic_none_outlined, '1-Sentence Voice Journal'),
-      MapEntry(Icons.do_not_disturb_on_outlined, 'Skip 1 "Trauma Dump" Convo'),
-    ],
-    'Productivity & Learning': [
-      MapEntry(Icons.cleaning_services_outlined, '1-Min Speed Clean (Ads)'),
-      MapEntry(Icons.work_outline, 'Open Job App Before Gaming'),
-      MapEntry(Icons.book_outlined, 'Open Textbook Before Netflix'),
-      MapEntry(Icons.bookmark_add_outlined, 'Bookmark Recipes You Cook'),
-      MapEntry(Icons.speed_outlined, 'Podcast 2x Speed (Chores)'),
-      MapEntry(Icons.edit_note_outlined, 'Replace "Busy" Correctly'),
-    ],
-    'Sustainability & Finance': [
-      MapEntry(Icons.coffee_maker_outlined, 'Use Reusable Coffee Cup'),
-      MapEntry(Icons.sell_outlined, 'Photo Outfit for Resale'),
-      MapEntry(Icons.recycling_outlined, 'Leave 1 Toxic Group Weekly'),
-    ],
-  };
-
-  // --- Negative Habits Data ---
-  static const Map<String, List<MapEntry<IconData, String>>>
-      _negativeHabitGroups = {
-    'Digital Habits to Break': [
-      MapEntry(Icons.textsms_outlined, 'Stop 100+ Unread Texts'),
-      MapEntry(Icons.subtitles_off_outlined, 'Stop Always Using Subtitles'),
-      MapEntry(Icons.screenshot_monitor_outlined, 'Stop Screenshotting Inspo'),
-      MapEntry(Icons.bed_outlined, 'Stop Using Bed as Desk'),
-      MapEntry(Icons.smart_display_outlined, 'Stop Watching "Study With Me"'),
-      MapEntry(Icons.tab_unselected_outlined, 'Stop Keeping 50+ Tabs Open'),
-      MapEntry(Icons.phonelink_erase_outlined, 'Stop 2 AM Scrolling'),
-      MapEntry(Icons.visibility_off_outlined, 'Stop "Seen" Ghosting'),
-    ],
-    'Spending & Consumption': [
-      MapEntry(Icons.fastfood_outlined, 'Stop Ordering Food When Bored'),
-      MapEntry(Icons.coffee_outlined, 'Stop \$7 Lattes (False Productivity)'),
-      MapEntry(Icons.shopping_bag_outlined, 'Stop Fast Fashion (One Use)'),
-      MapEntry(Icons.storefront_outlined, 'Stop Shein/Temu after 8 PM'),
-    ],
-    'Mindset & Social': [
-      MapEntry(Icons.event_busy_outlined, 'Stop "Start Monday" Excuse'),
-      MapEntry(
-          Icons.sentiment_dissatisfied_outlined, 'Stop Saying "I\'m Fine"'),
-      MapEntry(
-          Icons.phone_disabled_outlined, 'Stop Calling Family Only for \$'),
-      MapEntry(
-          Icons.cancel_presentation_outlined, 'Stop Saying Yes & Canceling'),
-      MapEntry(Icons.workspaces_outline, 'Stop Pretending Work in Cafes'),
-      MapEntry(Icons.folder_delete_outlined, 'Stop Hoarding Free PDFs'),
-      MapEntry(
-          Icons.mark_email_unread_outlined, 'Stop Apologizing "Double Text"'),
-    ],
-  };
-
-  // Removed single _habitGroups map
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize text field if cubit has a custom habit value
-    final cubit = context.read<OnboardingCubit>();
-    final initialHabit = cubit.state.selectedHabit;
-    final habitType = cubit.state.habitType; // Get habit type
-
-    bool isPredefined = false;
-    if (initialHabit != null && habitType != null) {
-      // Check against the correct list based on type
-      final groupsToCheck =
-          habitType == 'good' ? _positiveHabitGroups : _negativeHabitGroups;
-      for (var group in groupsToCheck.values) {
-        if (group.any((entry) => entry.value == initialHabit)) {
-          isPredefined = true;
-          break;
-        }
-      }
-      if (!isPredefined) {
-        _customHabitController.text = initialHabit;
-      }
-    }
-
-    _customHabitController.addListener(() {
-      final text = _customHabitController.text;
-      final currentHabit = context.read<OnboardingCubit>().state.selectedHabit;
-      if (text.isNotEmpty) {
-        if (currentHabit != text) {
-          context.read<OnboardingCubit>().setSelectedHabit(text);
-        }
-      } else {
-        if (currentHabit != null) {
-          // Check if the current habit was predefined before clearing
-          final habitType = context.read<OnboardingCubit>().state.habitType;
-          bool wasPredefined = false;
-          if (habitType != null) {
-            final groupsToCheck = habitType == 'good'
-                ? _positiveHabitGroups
-                : _negativeHabitGroups;
-            for (var group in groupsToCheck.values) {
-              if (group.any((entry) => entry.value == currentHabit)) {
-                wasPredefined = true;
-                break;
-              }
-            }
-          }
-          // Only clear cubit state if the text field is cleared AND the current state wasn't a predefined one
-          // Or if it was a custom one that's now empty.
-          if (!wasPredefined || currentHabit == text) {
-            // Allow clearing if it was custom text
-            context.read<OnboardingCubit>().setSelectedHabit(null);
-          }
-        }
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _customHabitController.dispose();
-    _scrollController.dispose();
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-  void _scrollToTopAndFocus() {
-    // Clear predefined selection when focusing text field
-    // context.read<OnboardingCubit>().setSelectedHabit(_customHabitController.text.isNotEmpty ? _customHabitController.text : null);
-    _scrollController.animateTo(
-      0,
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
-    _focusNode.requestFocus();
-    // Ensure text field content updates cubit state via listener
-  }
-
-  Widget _buildHabitGroup(
-      String title, List<MapEntry<IconData, String>> habits) {
-    // Read selected habit from cubit state within BlocBuilder or context.watch
-    final selectedHabit = context.watch<OnboardingCubit>().state.selectedHabit;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 4),
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-          ),
-        ),
-        Wrap(
-          spacing: 10.0, // Horizontal space between items
-          runSpacing: 10.0, // Vertical space between lines
-          children: habits.map((habit) {
-            final icon = habit.key;
-            final habitTitle = habit.value;
-            final isSelected = selectedHabit == habitTitle;
-
-            return SizedBox(
-              width: (MediaQuery.of(context).size.width / 2) -
-                  20 - // Padding
-                  5, // Spacing / 2
-              child: SelectableOption(
-                isSelected: isSelected,
-                onSelected: () {
-                  // Update cubit state with the selected predefined habit
-                  context.read<OnboardingCubit>().setSelectedHabit(habitTitle);
-                  _customHabitController.clear(); // Clear text field
-                  FocusScope.of(context).unfocus(); // Hide keyboard
-                  // No need for setState if UI relies on BlocBuilder/watch
-                },
-                child: Row(
-                  children: [
-                    Icon(icon,
-                        size: 20,
-                        color: isSelected ? Colors.white : Colors.black87),
-                    SizedBox(width: 8),
-                    Expanded(
-                      // Use Flexible + Text instead of FittedBox for better control
-                      child: Center(
-                        child: Text(
-                          habitTitle,
-                          style: TextStyle(
-                              fontWeight: FontWeight.w500, fontSize: 13),
-                          maxLines: 2, // Ensure single line
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Use BlocBuilder or context.watch for reactive UI updates
-    final state = context.watch<OnboardingCubit>().state;
-    final habitType = state.habitType; // 'good' or 'bad'
-    final selectedHabitGroups = (habitType == 'good')
-        ? _positiveHabitGroups
-        : _negativeHabitGroups; // Default to negative if null? Or handle error.
-
-    // Determine title and hint text based on habitType
-    final String titleText = (habitType == 'good')
-        ? "Choose or Define a GOOD Habit"
-        : "Choose or Define a BAD Habit to Stop";
-    final String hintText = (habitType == 'good')
-        ? 'E.g., Read one chapter daily'
-        : 'E.g., Stop scrolling social media after 10 PM';
-    final String buttonText =
-        (habitType == 'good') ? "Write New GOOD Habit" : "Write New BAD Habit";
-
-    // Handle case where habitType might be null (shouldn't happen if flow is correct)
-    if (habitType == null) {
-      return Center(child: Text("Error: Habit type not selected."));
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ... Title and Subtitle ...
-          Text(titleText, // Use dynamic title
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  )),
-          SizedBox(height: 8),
-          Text("Select a common habit or type your own goal below.",
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.black87,
-                  )),
-          SizedBox(height: 16),
-          TextField(
-            controller: _customHabitController,
-            focusNode: _focusNode,
-            decoration: InputDecoration(
-              hintText: hintText, // Use dynamic hint text
-              prefixIcon:
-                  Icon(Icons.edit_outlined, color: Colors.grey.shade600),
-              filled: true,
-              fillColor: Colors.grey.shade200,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding:
-                  EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-            ),
-            onTap: () {
-              // Tapping text field implicitly deselects predefined via listener logic
-              // If text field is empty when tapped, ensure cubit state is cleared
-              if (_customHabitController.text.isEmpty) {
-                context.read<OnboardingCubit>().setSelectedHabit(null);
-              }
-            },
-            // onChanged handled by listener in initState
-          ),
-          SizedBox(height: 20),
-          Expanded(
-            // Use BlocBuilder here to rebuild habit groups when state changes
-            // No need for BlocBuilder if context.watch is used above for state
-            child: ListView(
-              controller: _scrollController,
-              children: selectedHabitGroups.entries // Use selected groups
-                  .map((entry) => _buildHabitGroup(entry.key, entry.value))
-                  .toList(),
-            ),
-          ),
-          SizedBox(height: 10),
-          Center(
-            child: TextButton.icon(
-              icon: Icon(Icons.arrow_upward_rounded),
-              label: Text(buttonText), // Use dynamic button text
-              onPressed: _scrollToTopAndFocus,
-              style: TextButton.styleFrom(
-                foregroundColor:
-                    Theme.of(context).primaryColor, // Use theme color
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 // --- Add the new ThankYouSlide Widget ---
 
 class ThankYouSlide extends StatelessWidget {
@@ -1037,107 +722,6 @@ class ThankYouSlide extends StatelessWidget {
                 ),
           ),
           Spacer(), // Pushes content towards center if needed
-        ],
-      ),
-    );
-  }
-}
-
-class SetupProgressSlide extends StatefulWidget {
-  final VoidCallback onComplete; // Optional callback for completion
-  const SetupProgressSlide({
-    super.key,
-    required this.onComplete,
-  });
-
-  @override
-  State<SetupProgressSlide> createState() => _SetupProgressSlideState();
-}
-
-class _SetupProgressSlideState extends State<SetupProgressSlide> {
-  int _subtitleIndex = 0;
-  Timer? _subtitleTimer;
-  Timer? _navigationTimer;
-
-  final List<String> _subtitles = [
-    "Analyzing your preferences...",
-    "Selecting your habits...",
-    "Finding peers like you...",
-    "Preparing your votes...",
-    "Building your custom plan...",
-    "Finalizing setup...",
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Timer to change subtitle every 2 seconds
-    _subtitleTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      setState(() {
-        _subtitleIndex = (_subtitleIndex + 1) % _subtitles.length;
-      });
-    });
-
-    // Timer to navigate after a delay (e.g., 5 seconds)
-    // Adjust duration as needed
-    _navigationTimer = Timer(const Duration(seconds: 5), () {
-      if (mounted) {
-        // Navigate to the main app screen, replace '/home' with your actual route
-        widget.onComplete();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _subtitleTimer?.cancel();
-    _navigationTimer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            "Setting things up for you",
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-          ),
-          SizedBox(height: 24),
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xff2D2C2D)),
-            strokeWidth: 3.0,
-          ),
-          SizedBox(height: 24),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            child: Text(
-              _subtitles[_subtitleIndex],
-              key: ValueKey<int>(
-                  _subtitleIndex), // Important for AnimatedSwitcher
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.black54,
-                  ),
-            ),
-          ),
-          Spacer(), // Pushes content towards center
         ],
       ),
     );
