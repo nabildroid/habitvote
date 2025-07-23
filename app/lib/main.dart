@@ -101,7 +101,7 @@ Future<void> setUpSplashScreen(WidgetsBinding widgetsBinding) async {
   if (Platform.isAndroid) {
     FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-    Future.delayed(const Duration(seconds: 50), () {
+    Future.delayed(const Duration(seconds: 5), () {
       FlutterNativeSplash.remove();
     });
   }

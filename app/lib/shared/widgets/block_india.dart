@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:habitvote/shared/utils.dart';
 
 // Top-level function for isolate computation
 List<Point<int>> _generatePathIsolate(int gridSize) {
@@ -169,6 +170,8 @@ class _BlockIndiaState extends State<BlockIndia> {
   void initState() {
     super.initState();
     _resetGame();
+
+    removeSplashScreen(Duration.zero);
   }
 
   Future<void> _resetGame() async {
