@@ -52,6 +52,7 @@ permission_handler_android=/home/nabil/.pub-cache/hosted/pub.dev/permission_hand
 permission_handler_apple=/home/nabil/.pub-cache/hosted/pub.dev/permission_handler_apple-9.4.7/
 permission_handler_html=/home/nabil/.pub-cache/hosted/pub.dev/permission_handler_html-0.1.3+5/
 permission_handler_windows=/home/nabil/.pub-cache/hosted/pub.dev/permission_handler_windows-0.2.1/
+posthog_flutter=/home/nabil/.pub-cache/hosted/pub.dev/posthog_flutter-5.1.0/
 sentry_flutter=/home/nabil/.pub-cache/hosted/pub.dev/sentry_flutter-8.14.2/
 shared_preferences=/home/nabil/.pub-cache/hosted/pub.dev/shared_preferences-2.5.3/
 shared_preferences_android=/home/nabil/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.9/

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:habitvote/features/habit/presentations/utils/habit_context_extension.dart';
 import 'package:habitvote/features/habit/presentations/widgets/checkin/checkin_actions.dart';
 import 'package:habitvote/features/habit/presentations/widgets/skip_premium_popup.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 
 class ClosedWindowCheckIn extends StatelessWidget {
   const ClosedWindowCheckIn({super.key});
@@ -14,8 +15,13 @@ class ClosedWindowCheckIn extends StatelessWidget {
       children: [
         CheckInTimer(),
         const SizedBox(height: 16),
-        CheckInActions(
-          locked: true,
+        GestureDetector(
+          onTapDown: (_) {
+            Posthog().capture(eventName: 'click_checkin_closed_window');
+          },
+          child: CheckInActions(
+            locked: true,
+          ),
         ),
         const SizedBox(height: 8),
         SkipWaiting(),
@@ -80,6 +86,8 @@ class SkipWaiting extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
+        Posthog().capture(eventName: 'click_skip_closed_window');
+
         showDialog(
           context: context,
           builder: (context) => SkipPremiumPopup(

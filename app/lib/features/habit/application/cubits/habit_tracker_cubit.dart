@@ -8,6 +8,7 @@ import 'package:habitvote/features/habit/application/cubits/notification_habit_c
 import 'package:habitvote/features/habit/data/models/checkin_model.dart';
 import 'package:habitvote/features/habit/data/models/habit_model.dart';
 import 'package:habitvote/features/habit/data/repositories/habit_repository.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../data/repositories/tracker_repository.dart';
@@ -99,6 +100,8 @@ class HabitTrackerCubit extends Cubit<HabitTrackerState> {
     await trackerRepo.create(checkin);
 
     rescheduleNotifcations();
+
+    logCheckin(checkin);
   }
 
   void undoCheckIn({DateTime? date}) {
@@ -146,9 +149,11 @@ class HabitTrackerCubit extends Cubit<HabitTrackerState> {
 
 extension HabitTimerExtension on HabitTrackerCubit {
   static Timer? _timer;
+  static DateTime? _timerStartedAt;
 
   void _startTimer() {
     _cancelTimer();
+    _timerStartedAt = DateTime.now();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _updateDuration();
     });
@@ -157,6 +162,7 @@ extension HabitTimerExtension on HabitTrackerCubit {
   void _cancelTimer() {
     _timer?.cancel();
     _timer = null;
+    _timerStartedAt = null;
   }
 
   void _updateDuration() {
@@ -184,6 +190,11 @@ extension HabitTimerExtension on HabitTrackerCubit {
     }
 
     if (now.isAfter(openDateTime) && now.isBefore(closeDateTime)) {
+      if (durationToOpenWindow.value != Duration.zero &&
+          _timerStartedAt != null) {
+        final waitedDuration = now.difference(_timerStartedAt!);
+        logTimerWaited(waitedDuration);
+      }
       durationToOpenWindow.add(Duration.zero);
     } else {
       DateTime nextOpenDateTime;
@@ -209,6 +220,7 @@ extension HabitEditingExtension on HabitTrackerCubit {
     emit(state.copyWith(habit: updatedHabit));
     await habitRepo.update(updatedHabit);
     rescheduleNotifcations();
+    logUpdateHabitDetails(updatedHabit);
   }
 
   Future<void> updateCheckinWindow({TimeOfDay? open, TimeOfDay? close}) async {
@@ -221,6 +233,8 @@ extension HabitEditingExtension on HabitTrackerCubit {
     _updateDuration();
     await habitRepo.update(updatedHabit);
     rescheduleNotifcations();
+
+    logUpdateCheckinWindow(updatedHabit);
   }
 
   Future<void> updateTriggers(List<TimeOfDay> triggers) async {
@@ -228,5 +242,34 @@ extension HabitEditingExtension on HabitTrackerCubit {
     final updatedHabit = state.habit!.copyWith(triggers: triggers);
     emit(state.copyWith(habit: updatedHabit));
     await habitRepo.update(updatedHabit);
+  }
+}
+
+extension _Analytics on HabitTrackerCubit {
+  void logCheckin(CheckinModel checkin) {
+    Posthog().capture(eventName: 'checkin', properties: {
+      'habit_id': checkin.habitId,
+      'is_done': checkin.isDone,
+    });
+  }
+
+  void logTimerWaited(Duration duration) {
+    Posthog().capture(eventName: 'timer_waited', properties: {
+      'duration_seconds': duration.inSeconds,
+    });
+  }
+
+  void logUpdateHabitDetails(HabitModel habit) {
+    Posthog().capture(eventName: 'update_habit_details', properties: {
+      'name': habit.name,
+      'is_negative': habit.isNegative,
+    });
+  }
+
+  void logUpdateCheckinWindow(HabitModel habit) {
+    Posthog().capture(eventName: 'update_checkin_window', properties: {
+      'open': habit.checkinOpenWindow,
+      'close': habit.checkinCloseWindow,
+    });
   }
 }

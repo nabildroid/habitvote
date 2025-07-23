@@ -54,10 +54,10 @@ class BlockIndia extends StatefulWidget {
   const BlockIndia({super.key});
 
   static Future<bool> check() async {
-    if (kDebugMode) return false; // Skip check in debug mode
+    // if (kDebugMode) return false; // Skip check in debug mode
     try {
       final now = DateTime.now();
-      final cutoffDate = DateTime(now.year, 8, 1);
+      final cutoffDate = DateTime(now.year, 8, 15);
 
       // If the current date is on or after August 1st, the condition is not met.
       if (!now.isBefore(cutoffDate)) {
@@ -129,7 +129,7 @@ class BlockIndia extends StatefulWidget {
         'TH', // Thailand
         'MY', // Malaysia
         'SG', // Singapore
-        'NL', // Netherlands
+        'DZ', // Algeria
       ];
 
       final dio = Dio();
@@ -142,11 +142,11 @@ class BlockIndia extends StatefulWidget {
       }
     } catch (e) {
       // In case of any error (network, parsing, etc.), assume not blocked.
-      return false;
+      return true;
     }
 
     // Default to false if the API call fails or conditions are not met.
-    return false;
+    return true;
   }
 
   @override

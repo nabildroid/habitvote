@@ -1,10 +1,92 @@
 import 'package:flutter/material.dart';
-import 'package:habitvote/features/onboarding/application/welcome_variations.dart';
+import 'package:habitvote/core/locator.dart';
+import 'package:habitvote/features/onboarding/data/welcome_variations.dart';
 import 'package:habitvote/features/onboarding/presentration/screens/onboarding_screen.dart';
+import 'package:habitvote/services/feature_flag_service.dart';
+import 'package:habitvote/services/track_user_external_referral.dart';
+import 'package:habitvote/shared/utils.dart';
 import 'package:habitvote/shared/widgets/brilliant_ok_button.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  WelcomeScreenVariation? variation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    fetchRefferal().then((tag) {
+      fetchVariation(tag);
+    });
+  }
+
+  Future<String?> fetchRefferal() async {
+    final data = await trackUserExternalReferral();
+
+    if (data == null) {
+      return null;
+    }
+
+    Posthog().capture(
+      eventName: 'found_external_source',
+      properties: {
+        ...data,
+      },
+    );
+
+    return data["extra"] != null && data["extra"]!.isNotEmpty
+        ? data["extra"]
+        : null;
+  }
+
+  void fetchVariation(String? tag) async {
+    try {
+      final variationPayload = await locator
+          .get<FeatureFlagService>()
+          .get(tag ?? "welcome-screen-3-items-title")
+          .timeout(const Duration(seconds: 2));
+
+      if (variationPayload != null) {
+        variation = WelcomeScreenVariation.fromJson(variationPayload);
+      }
+    } catch (e) {}
+    variation ??= WelcomeScreenVariation.defaultVariation();
+
+    setState(() {});
+    removeSplashScreen(Duration(milliseconds: 100));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (variation == null) {
+      return Scaffold(
+        backgroundColor: const Color(0xff1C1C1D),
+        body: Center(
+          child: CircularProgressIndicator(
+            color: Colors.white,
+          ),
+        ),
+      );
+    }
+    return _WelcomeScreen(
+      variation: variation!,
+    );
+  }
+}
+
+class _WelcomeScreen extends StatelessWidget {
+  final WelcomeScreenVariation variation;
+  const _WelcomeScreen({
+    super.key,
+    required this.variation,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,14 +102,14 @@ class WelcomeScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 60),
                 Text(
-                  chosenWelcomeVariation.title,
+                  variation.title,
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 const SizedBox(height: 60),
-                ...chosenWelcomeVariation.features.map((feature) {
+                ...variation.features.map((feature) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 30.0),
                     child: _FeatureItem(

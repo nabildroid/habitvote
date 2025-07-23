@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:habitvote/core/locator.dart';
 import 'package:habitvote/features/user/data/auth_service.dart';
 import 'package:habitvote/features/user/data/models/user_model.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 enum AuthStatus { inside, out, checking }
@@ -71,7 +72,19 @@ class AuthCubit extends Cubit<AuthState> {
     super.onChange(change);
 
     final user = change.nextState.user;
+
     if (user != null) {
+      final isGuess = user.email.endsWith("@anonymous.com");
+      Posthog().identify(userId: user.uid, userPropertiesSetOnce: {
+        if (!isGuess) ...{
+          'email': user.email,
+          "name": user.displayName,
+        }
+      }, userProperties: {
+        if (isGuess) ...{
+          'isGuess': true,
+        }
+      });
       // Sentry.configureScope((scope) async {
       //   await scope.setUser(
       //     SentryUser(

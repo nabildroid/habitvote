@@ -2,17 +2,20 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:habitvote/core/cubits/app_cubit.dart';
 import 'package:habitvote/core/network/connectivity.dart';
+import 'package:habitvote/services/feature_flag_service.dart';
 import 'package:habitvote/services/firebase_service.dart';
 import 'package:habitvote/services/notification_service.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:timezone/data/latest_10y.dart' as tz;
 import 'package:habitvote/app.dart';
@@ -37,6 +40,8 @@ void main() async {
 
   await initNotification();
 
+  await locator<FeatureFlagService>().init();
+
   final appCubit = AppCubit();
   runApp(
     BlocProvider.value(
@@ -51,7 +56,7 @@ Future<Database> setUpStorage() async {
   final dir = await getApplicationDocumentsDirectory();
   await dir.create(recursive: true);
 
-  PreferenceExtension.globalPrefix = "37";
+  PreferenceExtension.globalPrefix = "38";
   final db = await databaseFactoryIo.openDatabase(
     join(dir.path, 'habitVote_v${PreferenceExtension.globalPrefix}.db'),
   );
@@ -71,14 +76,14 @@ Future<Database> setUpStorage() async {
 
 Future<void> setupAnalytics() async {
   if (!Platform.isAndroid) return;
-  // final config =
-  //     PostHogConfig('phc_qKJNHn1RX2l75TYuzvr2zbToLu2ilYTI1n8k6lTqXIK');
-  // // config.debug = true;
-  // config.captureApplicationLifecycleEvents = true;
-  // config.debug = !kReleaseMode;
-  // config.host = 'https://eu.i.posthog.com';
+  final config =
+      PostHogConfig('phc_QihGCZ9dHMgantp8Je9rhWV6GyekldLb9E8PaHDLcnL');
+  // config.debug = true;
+  config.captureApplicationLifecycleEvents = true;
+  config.debug = !kReleaseMode;
+  config.host = 'https://eu.i.posthog.com';
 
-  // await Posthog().setup(config);
+  await Posthog().setup(config);
 }
 
 Future<void> setUpErrorHandling() async {
@@ -95,7 +100,8 @@ Future<void> setUpErrorHandling() async {
 Future<void> setUpSplashScreen(WidgetsBinding widgetsBinding) async {
   if (Platform.isAndroid) {
     FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-    Future.delayed(const Duration(seconds: 2), () {
+
+    Future.delayed(const Duration(seconds: 50), () {
       FlutterNativeSplash.remove();
     });
   }

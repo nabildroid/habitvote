@@ -45,6 +45,12 @@
             </intent-filter>
         </receiver>
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
+
+        <meta-data android:name="com.posthog.posthog.API_KEY" android:value="phc_QihGCZ9dHMgantp8Je9rhWV6GyekldLb9E8PaHDLcnL" />
+        <meta-data android:name="com.posthog.posthog.POSTHOG_HOST" android:value="https://eu.i.posthog.com" />
+        <meta-data android:name="com.posthog.posthog.TRACK_APPLICATION_LIFECYCLE_EVENTS" android:value="true" />
+        <meta-data android:name="com.posthog.posthog.DEBUG" android:value="true" />
+        
         
     </application>
     <!-- Required to query activities that can process text, see:

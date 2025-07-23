@@ -9,7 +9,9 @@ import 'package:habitvote/features/vote/data/models/candidat_model.dart';
 import 'package:habitvote/features/vote/data/models/vote_model.dart';
 import 'package:habitvote/features/vote/data/repositories/votes_repository.dart';
 import 'package:habitvote/shared/dates_utils.dart';
+import 'package:habitvote/shared/utils.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 
 class VotesState extends Equatable {
@@ -97,6 +99,7 @@ class VotesCubit extends HydratedCubit<VotesState> {
     emit(state.copyWith(
       votedOnToday: [...state.votedOnToday, candidat.id],
     ));
+    logVote(candidat, positive);
   }
 
   showVoteResults() async {
@@ -104,6 +107,8 @@ class VotesCubit extends HydratedCubit<VotesState> {
     emit(state.copyWith(
       showTodayResults: true,
     ));
+
+    logShowResults();
   }
 
   @override
@@ -134,9 +139,25 @@ extension SyncWithHabit on VotesCubit {
     _listeners.add(habitStream.listen((habit) async {
       final vote = await repo.getTodayVoteByHabitId(habit.id);
 
+      removeSplashScreen(Duration(milliseconds: 100));
+
       if (vote != null) {
         load(vote);
       }
     }));
+  }
+}
+
+extension _Analytics on VotesCubit {
+  void logVote(CandidatModel checkin, bool isPositive) {
+    Posthog().capture(eventName: 'voteOn', properties: {
+      'habit_id': checkin.habitId,
+      'candidat_id': checkin.id,
+      'is_positive': isPositive,
+    });
+  }
+
+  void logShowResults() {
+    Posthog().capture(eventName: 'showVoteResults');
   }
 }

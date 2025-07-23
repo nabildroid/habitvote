@@ -12,6 +12,7 @@ import 'package:habitvote/features/user/presentation/screens/create_account_slid
 import 'package:habitvote/features/onboarding/presentration/widgets/habitVoteDifference.dart';
 import 'package:habitvote/shared/widgets/brilliant_ok_button.dart';
 import 'package:intl/intl.dart'; // Import for date formatting
+import 'package:posthog_flutter/posthog_flutter.dart';
 
 import '../../application/cubits/onboarding_cubit.dart';
 // Removed unused import
@@ -123,6 +124,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
 
     setState(() {}); // Rebuild to update progress bar potentially
+
+    logStep();
   }
 
   @override
@@ -209,6 +212,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 }),
           ),
         ]);
+  }
+
+  void logStep() {
+    final currentPage = controller.page?.round() ?? 0;
+    if (currentPage < totalSteps - 1) {
+      final nextStep = _steps[currentPage + 1];
+      final nextPageName = nextStep.widget.runtimeType.toString();
+
+      Posthog().capture(eventName: "onboarding_step_completed", properties: {
+        "step": nextPageName,
+      });
+    }
   }
 }
 

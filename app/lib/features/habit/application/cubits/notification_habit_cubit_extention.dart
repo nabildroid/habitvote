@@ -27,6 +27,9 @@ extension HabitNotificationsExtension on HabitTrackerCubit {
     await _saveNotificationSchedule(schedule);
 
     for (final noti in schedule) {
+      if (!noti.dateTime.isAfter(DateTime.now()))
+        continue; // todo, this is a bug,/ skip past notifications
+
       await _noti.scheduleNotification(
         NotificationChannelType.reminder,
         id: noti.id,

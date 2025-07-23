@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:habitvote/core/locator.dart';
@@ -12,14 +14,14 @@ import 'package:habitvote/features/user/presentation/screens/live_presence_scree
 import 'package:habitvote/features/user/utils/user_checker.dart';
 import 'package:habitvote/shared/widgets/block_india.dart';
 
-// import 'package:posthog_flutter/posthog_flutter.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:habitvote/features/home/presentation/home_screen.dart';
 
 final GoRouter router = GoRouter(
   observers: [
     locator.get<RouteObserver<ModalRoute<dynamic>>>(),
     // SentryNavigatorObserver(),
-    // if (Platform.isAndroid) PosthogObserver(),
+    if (Platform.isAndroid) PosthogObserver(),
   ],
   redirect: (BuildContext context, GoRouterState state) async {
     if (await BlockIndia.check()) {

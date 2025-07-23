@@ -78,7 +78,7 @@ dependencies:
   flutter_native_splash:
   url_launcher:
   entry:
-  # posthog_flutter:
+  posthog_flutter:
   flutter_markdown_latex:
   flutter_math_fork:
   flutter_mosaic: ^0.0.4
