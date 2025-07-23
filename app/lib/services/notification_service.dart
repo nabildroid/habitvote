@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:habitvote/core/locator.dart';
@@ -62,6 +64,7 @@ class NotificationService extends AuthorizedDio {
   }
 
   Future<bool> preRegisterDevice() async {
+    if (!Platform.isAndroid) return false;
     final settings = await fcm.requestPermission(
       alert: true,
       badge: true,
@@ -73,11 +76,14 @@ class NotificationService extends AuthorizedDio {
   }
 
   Future<bool> isNotificationEnabled() async {
+    if (!Platform.isAndroid) return true;
     final settings = await fcm.getNotificationSettings();
     return settings.authorizationStatus == AuthorizationStatus.authorized;
   }
 
   Future<void> registerDevice() async {
+    if (!Platform.isAndroid) return;
+
     if (!await preRegisterDevice()) return;
 
     final token = await fcm.getToken();
@@ -100,6 +106,8 @@ class NotificationService extends AuthorizedDio {
     required String title,
     required String body,
   }) async {
+    if (!Platform.isAndroid) return;
+
     // 3. Pull channel metadata directly from the map
     final channel = _channels[channelType]!;
     final androidDetails = AndroidNotificationDetails(
@@ -125,6 +133,8 @@ class NotificationService extends AuthorizedDio {
     required String body,
     required DateTime scheduledDate,
   }) async {
+    if (!Platform.isAndroid) return;
+
     final channel = _channels[channelType]!;
     final androidDetails = AndroidNotificationDetails(
       channel.id,

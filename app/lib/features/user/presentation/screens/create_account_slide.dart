@@ -44,8 +44,7 @@ class CreateAccountSlide extends StatelessWidget {
             text: "Sign in with Google",
           ),
           if (DateTime.now().isBefore(DateTime(2025, 8, 1)))
-            BrilliantOkButton(
-              tag: "Guesst",
+            TextButton(
               onPressed: () async {
                 await locator.get<AuthService>().anonymousLogin();
 
@@ -54,7 +53,7 @@ class CreateAccountSlide extends StatelessWidget {
                 await context.read<HabitTrackerCubit>().init(fresh: true);
                 context.go("/home");
               },
-              text: "Guest Sign in",
+              child: Text("Guest Sign in"),
             ),
           SizedBox(height: 16),
           // TextButton(

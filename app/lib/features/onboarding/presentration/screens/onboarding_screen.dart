@@ -15,6 +15,20 @@ import '../../application/cubits/onboarding_cubit.dart';
 // Removed unused import
 import '../widgets/selectable_option.dart';
 
+class _OnboardingStep {
+  final Widget widget;
+  final bool Function(OnboardingState state) isStepCompleted;
+  final String? buttonText;
+  final bool showButton;
+
+  const _OnboardingStep({
+    required this.widget,
+    required this.isStepCompleted,
+    this.buttonText,
+    this.showButton = true,
+  });
+}
+
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -26,7 +40,77 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final controller = PageController();
   // totalInteractiveSteps remains 9 if TopicChooser is replaced by CustomPlanSlide
   // Let's keep totalSteps as the total number of pages (0-indexed)
-  final int totalSteps = 10; // 0 to 9
+  late final List<_OnboardingStep> _steps;
+  int get totalSteps => _steps.length;
+
+  @override
+  void initState() {
+    super.initState();
+    _steps = [
+      // _OnboardingStep(
+      //   widget: GenderChooser(),
+      //   isStepCompleted: (state) => state.gender != null,
+      // ), // 0
+      // _OnboardingStep(
+      //   widget: CommitmentQuestion(),
+      //   isStepCompleted: (state) => state.commitmentLevel != null,
+      // ), // 1
+      // _OnboardingStep(
+      //   widget: OtherAppsUsage(),
+      //   isStepCompleted: (state) => state.usedOtherApps != null,
+      // ), // 2
+      // _OnboardingStep(
+      //   widget: HabitVoteDifference(),
+      //   isStepCompleted: (state) => true,
+      // ), // 3
+      _OnboardingStep(
+        widget: HabitCategoryChooser(),
+        isStepCompleted: (state) => state.habitType != null,
+      ), // 4
+      _OnboardingStep(
+        widget: HabitChooser(),
+        isStepCompleted: (state) =>
+            state.selectedHabit != null && state.selectedHabit!.isNotEmpty,
+      ), // 5
+      // _OnboardingStep(
+      //   widget: AgeGroupSelector(),
+      //   isStepCompleted: (state) => state.age != null,
+      // ), // 6
+      _OnboardingStep(
+        widget: CheckInWindownPicker(),
+        isStepCompleted: (state) => true,
+      ), // 7
+      _OnboardingStep(
+        widget: TriggerHeatMap(),
+        isStepCompleted: (state) => true,
+      ), // 8
+      _OnboardingStep(
+        widget: ThankYouSlide(),
+        isStepCompleted: (state) => true,
+        buttonText: "Create my plan",
+      ), // 9
+      _OnboardingStep(
+        widget: SetupProgressSlide(
+          onComplete: () => controller.nextPage(
+            duration: Duration(milliseconds: 350),
+            curve: Curves.easeInOut,
+          ),
+        ),
+        isStepCompleted: (state) => true,
+        showButton: false,
+      ), // 10
+      _OnboardingStep(
+        widget: CustomPlanSlide(),
+        isStepCompleted: (state) => true,
+        buttonText: "Let's get started!",
+      ), // 11
+      _OnboardingStep(
+        widget: CreateAccountSlide(),
+        isStepCompleted: (state) => true,
+        showButton: false,
+      ), // 12
+    ];
+  }
 
   void next() {
     // Navigate to register on the last step (CreateAccountSlide)
@@ -82,27 +166,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             controller: controller,
             physics: NeverScrollableScrollPhysics(),
             scrollDirection: Axis.horizontal,
-            children: [
-              GenderChooser(), // 0
-              CommitmentQuestion(), // 1
-              OtherAppsUsage(), // 2
-              HabitVoteDifference(), // 3 - No input needed
-              HabitCategoryChooser(), // 4
-              HabitChooser(), // 5
-              AgeGroupSelector(), // 7
-              CheckInWindownPicker(), // 8
-              TriggerHeatMap(), // 9
-              ThankYouSlide(), // 10 - No input needed
-              SetupProgressSlide(
-                onComplete: () => controller.nextPage(
-                  duration: Duration(milliseconds: 350),
-                  curve: Curves.easeInOut,
-                ),
-              ), // 11 - No input needed
-              CustomPlanSlide(), // 12 - No input needed
-              CreateAccountSlide(), // 13 - Leads to registration
-              // Removed SetupProgressSlide as it seems replaced or unused
-            ],
+            children: _steps.map((step) => step.widget).toList(),
           ),
         ),
         persistentFooterButtons: [
@@ -117,50 +181,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   // Use BlocBuilder here for direct access to state for button logic
                   return BlocBuilder<OnboardingCubit, OnboardingState>(
                       builder: (context, state) {
-                    bool allowControl =
-                        true; // Default to true for non-input slides
-                    int currentPage = controller.page?.round() ?? 0;
-
-                    // Enable/disable based on current page's required state
-                    if (currentPage == 0) {
-                      // GenderChooser
-                      allowControl = state.gender != null;
-                    } else if (currentPage == 1) {
-                      // CommitmentQuestion
-                      allowControl = state.commitmentLevel != null;
-                    } else if (currentPage == 2) {
-                      // OtherAppsUsage
-                      allowControl = state.usedOtherApps != null;
-                    } else if (currentPage == 4) {
-                      // HabitCategoryChooser
-                      allowControl = state.habitType != null;
-                    } else if (currentPage == 5) {
-                      // HabitChooser
-                      allowControl = state.selectedHabit != null &&
-                          state.selectedHabit!.isNotEmpty;
-                    } else if (currentPage == 6) {
-                      // AgeGroupSelector
-                      allowControl = state.age != null;
-                    }
-                    // Pages 3, 7, 8 don't require input, allowControl remains true.
-                    // Page 9 (CreateAccountSlide) has specific button text.
-
-                    // Hide button if controller is not ready
-                    if (!controller.hasClients ||
-                        currentPage == 10 ||
-                        currentPage == 12) {
+                    if (!controller.hasClients) {
                       return SizedBox.shrink();
                     }
+
+                    int currentPage = controller.page?.round() ?? 0;
+                    final currentStep = _steps[currentPage];
+
+                    if (!currentStep.showButton) {
+                      return SizedBox.shrink();
+                    }
+
+                    final allowControl = currentStep.isStepCompleted(state);
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 28.0),
                       child: BrilliantOkButton(
-                        // Text changes on the last slide before registration
-                        text: currentPage == 9
-                            ? "Create my plan"
-                            : currentPage == 11
-                                ? "Let's get started!"
-                                : "Next",
+                        text: currentStep.buttonText ?? "Next",
                         tag: "continue",
                         disabled: !allowControl,
                         onPressed: next,

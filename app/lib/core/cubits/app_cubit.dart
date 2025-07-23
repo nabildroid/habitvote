@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,6 +42,8 @@ class AppCubit extends Cubit<AppState> {
   final notifications = locator.get<NotificationService>();
 
   AppCubit() : super(AppState.initial()) {
+    if (!Platform.isAndroid) return;
+
     recheckNotifications();
   }
 

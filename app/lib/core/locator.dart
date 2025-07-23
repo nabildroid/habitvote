@@ -41,8 +41,8 @@ Future<void> setUpLocator({required Database sembastInstance}) async {
 
   if (Platform.isAndroid) {
     locator.registerSingleton(FirebaseService());
-    locator.registerSingleton(NotificationService());
   }
+  locator.registerSingleton(NotificationService());
   locator.registerSingleton(PaymentRepo());
 
   locator.registerSingleton(RouteObserver<ModalRoute<dynamic>>());
